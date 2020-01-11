@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/Azure/go-autorest/autorest/azure/auth"
@@ -91,13 +92,23 @@ func main() {
 	}
 
 	log = log.WithValues("gvk", object.GroupVersionKind().String(), "name", object.Name)
-	if err := managedclusters.NewService(authorizer, log).Ensure(context.Background(), object, creds); err != nil {
+	clusterSvc := managedclusters.NewService(authorizer, log)
+	if err := clusterSvc.Ensure(context.Background(), object, creds); err != nil {
 		log.Error(err, "failed to reconcile cluster")
 	} else {
 		log.Info("reconciled successfully")
 	}
 
-	failed := false
+	kubeconfig, err := clusterSvc.GetCredentials(context.Background(), object.Spec.SubscriptionID, object.Spec.ResourceGroup, object.Spec.Name)
+	if err != nil {
+		log.Error(err, "failed to fetch kubeconfig")
+	}
+
+	if err := ioutil.WriteFile("./kubeconfig", kubeconfig, 0644); err != nil {
+		log.Error(err, "failed to write kubeconfig")
+		os.Exit(1)
+	}
+
 	for i := range object.Spec.AgentPools {
 		val := object.Spec.AgentPools[i]
 		val.SubscriptionID = object.Spec.SubscriptionID
