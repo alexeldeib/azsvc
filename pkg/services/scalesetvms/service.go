@@ -3,8 +3,8 @@ package scalesetvms
 import (
 	"context"
 
-	"github.com/alexeldeib/azsvc/errors"
 	"github.com/Azure/go-autorest/autorest"
+	"github.com/alexeldeib/azsvc/pkg/errors"
 )
 
 type Service struct {

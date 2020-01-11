@@ -1,0 +1,79 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.4
+  creationTimestamp: null
+  name: agentpools.azure.alexeldeib.xyz
+spec:
+  group: azure.alexeldeib.xyz
+  names:
+    kind: AgentPool
+    listKind: AgentPoolList
+    plural: agentpools
+    singular: agentpool
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: AgentPool is the Schema for the agentpools API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: AgentPoolSpec defines the desired state of AgentPool
+          properties:
+            name:
+              description: Name is the name of the node pool.
+              type: string
+            osDiskSizeGB:
+              description: OSDiskSizeGB is the disk size for every machine in this
+                master/agent pool. If you specify 0, it will apply the default osDisk
+                size according to the vmSize specified.
+              format: int32
+              type: integer
+            replicas:
+              description: Replicas is the number of nodes in this agent pool.
+              format: int32
+              type: integer
+            sku:
+              description: SKU is the size of the VMs in the node pool.
+              type: string
+          required:
+          - name
+          - replicas
+          - sku
+          type: object
+        status:
+          description: AgentPoolStatus defines the observed state of AgentPool
+          properties:
+            id:
+              type: string
+            provisioningState:
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

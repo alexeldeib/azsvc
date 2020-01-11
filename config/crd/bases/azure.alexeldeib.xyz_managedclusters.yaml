@@ -1,0 +1,148 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.4
+  creationTimestamp: null
+  name: managedclusters.azure.alexeldeib.xyz
+spec:
+  group: azure.alexeldeib.xyz
+  names:
+    kind: ManagedCluster
+    listKind: ManagedClusterList
+    plural: managedclusters
+    singular: managedcluster
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: ManagedCluster is the Schema for the azuremanagedclusters API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: ManagedClusterSpec defines the desired state of ManagedCluster
+          properties:
+            dnsServiceIP:
+              description: DNSServiceIP - An IP address assigned to the Kubernetes
+                DNS service. It must be within the Kubernetes service address range
+                specified in serviceCidr.
+              type: string
+            loadBalancerSku:
+              description: 'LoadBalancerSKU for the managed cluster. Possible values
+                include: ''Standard'', ''Basic''. Defaults to standard.'
+              enum:
+              - Standard
+              - Basic
+              type: string
+            location:
+              description: Location is the region where the azure resource resides.
+              type: string
+            name:
+              description: Name is the name of the managed cluster in Azure.
+              type: string
+            networkPlugin:
+              description: 'NetworkPlugin used for building Kubernetes network. Possible
+                values include: ''Azure'', ''Kubenet''. Defaults to Azure.'
+              enum:
+              - Azure
+              - Kubenet
+              type: string
+            networkPolicy:
+              description: 'NetworkPolicy used for building Kubernetes network. Possible
+                values include: ''NetworkPolicyCalico'', ''NetworkPolicyAzure'''
+              enum:
+              - NetworkPolicyCalico
+              - NetworkPolicyAzure
+              type: string
+            nodePools:
+              description: AgentPools is the list of additional node pools managed
+                by this cluster.
+              items:
+                description: AgentPoolSpec defines the desired state of AgentPool
+                properties:
+                  name:
+                    description: Name is the name of the node pool.
+                    type: string
+                  osDiskSizeGB:
+                    description: OSDiskSizeGB is the disk size for every machine in
+                      this master/agent pool. If you specify 0, it will apply the
+                      default osDisk size according to the vmSize specified.
+                    format: int32
+                    type: integer
+                  replicas:
+                    description: Replicas is the number of nodes in this agent pool.
+                    format: int32
+                    type: integer
+                  sku:
+                    description: SKU is the size of the VMs in the node pool.
+                    type: string
+                required:
+                - name
+                - replicas
+                - sku
+                type: object
+              minItems: 1
+              type: array
+            podCidr:
+              description: PodCIDR is a CIDR notation IP range from which to assign
+                pod IPs when kubenet is used.
+              pattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$
+              type: string
+            resourceGroup:
+              description: ResourceGroup is the resource group name for an azure resource.
+              pattern: ^[-\w\._\(\)]+$
+              type: string
+            serviceCidr:
+              description: ServiceCIDR is a CIDR notation IP range from which to assign
+                service cluster IPs. It must not overlap with any Subnet IP ranges.
+              pattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$
+              type: string
+            sshPublicKey:
+              description: SSHPublicKey is a string literal containing an ssh public
+                key.
+              type: string
+            subscriptionId:
+              description: SubscriptionID is the subscription id for an azure resource.
+              pattern: ^[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}$
+              type: string
+            version:
+              description: Version defines the kubernetes version of the cluster.
+              type: string
+          required:
+          - location
+          - name
+          - nodePools
+          - resourceGroup
+          - sshPublicKey
+          - subscriptionId
+          - version
+          type: object
+        status:
+          description: ManagedClusterStatus defines the observed state of ManagedCluster
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

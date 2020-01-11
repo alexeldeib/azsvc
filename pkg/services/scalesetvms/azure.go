@@ -6,7 +6,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute"
 	"github.com/Azure/go-autorest/autorest"
 
-	"github.com/alexeldeib/azsvc/constants"
+	"github.com/alexeldeib/azsvc/pkg/constants"
 )
 
 type client struct {

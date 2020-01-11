@@ -5,24 +5,26 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/containerservice/mgmt/2019-11-01/containerservice"
 	"github.com/Azure/go-autorest/autorest"
 
-	"github.com/alexeldeib/azsvc/constants"
+	"github.com/alexeldeib/azsvc/pkg/constants"
 )
 
 type client struct {
 	containerservice.ManagedClustersClient
 }
 
-func newClient(authorizer autorest.Authorizer, subscriptionID string) (*client, error) {
+func newClient(authorizer autorest.Authorizer, subscriptionID string) (containerservice.ManagedClustersClient, error) {
 	var c = containerservice.NewManagedClustersClient(subscriptionID)
 	c.Authorizer = authorizer
+	c.PollingDuration = 45 * time.Minute
 	if err := c.AddToUserAgent(constants.UserAgent); err != nil {
-		return nil, err
+		return containerservice.ManagedClustersClient{}, err
 	}
-	return &client{c}, nil
+	return c, nil
 }
 
 func (c *client) createOrUpdate(ctx context.Context, group, name string, properties containerservice.ManagedCluster) (containerservice.ManagedCluster, error) {

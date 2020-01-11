@@ -13,6 +13,7 @@ type Spec struct {
 	subscriptionID string
 	group          string
 	internal       containerservice.ManagedCluster
+	future         []byte
 }
 
 func defaultSpec() *Spec {
