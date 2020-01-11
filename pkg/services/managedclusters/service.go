@@ -10,6 +10,7 @@ import (
 	"github.com/alexeldeib/azsvc/api/v1alpha1"
 	azerr "github.com/alexeldeib/azsvc/pkg/errors"
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -43,18 +44,13 @@ func NewService(authorizer autorest.Authorizer, logger logr.Logger) *Service {
 	}
 }
 
-func (s *Service) Ensure(ctx context.Context, obj *v1alpha1.ManagedCluster) error {
+func (s *Service) Ensure(ctx context.Context, obj *v1alpha1.ManagedCluster, creds *corev1.Secret) error {
 	client, err := newClient(s.authorizer, obj.Spec.SubscriptionID)
 	if err != nil {
 		return err
 	}
 
 	spec, err := s.Get(ctx, obj.Spec.SubscriptionID, obj.Spec.ResourceGroup, obj.Spec.Name)
-	if err != nil {
-		return err
-	}
-
-	settings, err := auth.GetSettingsFromFile()
 	if err != nil {
 		return err
 	}
@@ -66,7 +62,7 @@ func (s *Service) Ensure(ctx context.Context, obj *v1alpha1.ManagedCluster) erro
 		ResourceGroup(obj.Spec.ResourceGroup),
 		KubernetesVersion(obj.Spec.Version),
 		DNSPrefix(obj.Spec.Name),
-		ServicePrincipal(settings.Values[auth.ClientID], settings.Values[auth.ClientSecret]),
+		ServicePrincipal(string(creds.Data[auth.ClientID]), string(creds.Data[auth.ClientSecret])),
 		SSHPublicKey(obj.Spec.SSHPublicKey),
 	)
 

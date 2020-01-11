@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/cli-runtime/pkg/resource"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -82,8 +83,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	creds := &corev1.Secret{
+		Data: map[string][]byte{
+			auth.ClientID:     []byte(app),
+			auth.ClientSecret: []byte(key),
+		},
+	}
+
 	log = log.WithValues("gvk", object.GroupVersionKind().String(), "name", object.Name)
-	if err := managedclusters.NewService(authorizer, log).Ensure(context.Background(), object); err != nil {
+	if err := managedclusters.NewService(authorizer, log).Ensure(context.Background(), object, creds); err != nil {
 		log.Error(err, "failed to reconcile cluster")
 	} else {
 		log.Info("reconciled successfully")
