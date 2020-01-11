@@ -11,6 +11,7 @@ on:
 jobs:
     bootstrap:
         name: bootstrap mgmt cluster
+        runs-on: ubuntu-latest
         env:
             AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
             AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
