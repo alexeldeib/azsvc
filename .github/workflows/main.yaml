@@ -17,7 +17,7 @@ jobs:
             AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
             SSH_KEY: ${{ secrets.SSH_KEY }}
             KUSTOMIZE_VERSION: v3.5.4
-            FILE: ${GITHUB_WORKSPACE}/cmd/bootstrap/config.yaml
+            FILE: cmd/bootstrap/config.yaml
         steps:
         - uses: actions/checkout@master
         - uses: docker://alexeldeib/azsvc-kustomize:latest
