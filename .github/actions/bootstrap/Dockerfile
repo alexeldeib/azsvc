@@ -23,4 +23,4 @@ COPY ./.github/actions/bootstrap/entrypoint.sh /entrypoint.sh
 RUN chmod +x /out/bin/bootstrap
 RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT [ "/bin/bash", "-c", "/out/bin/bootstrap", "-f", "${FILE}", "--app", "${AZURE_CLIENT_ID}", "--tenant", "${AZURE_TENANT_ID}", "--key", "${AZURE_CLIENT_SECRET}" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
