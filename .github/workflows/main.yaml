@@ -19,16 +19,16 @@ jobs:
             KUSTOMIZE_VERSION: v3.5.4
         steps:
         - uses: actions/checkout@master
-        - name: test kubectl
-          run: kubectl --kubeconfig ./kubeconfig create secret generic flux-git-deploy --dry-run=true --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
         - name: install kustomize
           run: |
-            export PATH=$PATH:$(go env GOPATH)/bin
+            export PATH=$PATH:${HOME}/bin
             go env
+            mkdir ${HOME}/bin
             mkdir ${HOME}/kustomize
             cd ${HOME}/kustomize
             go mod init tmp
             go get sigs.k8s.io/kustomize/kustomize/v3@${KUSTOMIZE_VERSION}
+            cp $(go env GOPATH)/bin/kustomize ${HOME}/bin/kustomize
             cd ${HOME}
             rm -rf ${HOME}/kustomize
             kustomize
