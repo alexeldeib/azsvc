@@ -109,6 +109,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	var failed bool
 	for i := range object.Spec.AgentPools {
 		val := object.Spec.AgentPools[i]
 		val.SubscriptionID = object.Spec.SubscriptionID
