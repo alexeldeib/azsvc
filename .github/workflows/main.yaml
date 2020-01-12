@@ -4,10 +4,7 @@ on:
     # schedule daily for 3am PST == 11 UTC
     schedule:
         - cron: '0 */4 * * *'
-    push:
-        branches:
-            - master
-
+        
 jobs:
     bootstrap:
         name: bootstrap mgmt cluster

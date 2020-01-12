@@ -5,6 +5,7 @@ on:
         - cron: '0 */6 * * *'
     push:
         branches:
+            - ace/dev
             - master
 
 jobs:
@@ -17,4 +18,7 @@ jobs:
         steps:
         - uses: actions/checkout@master
         - name: bootstrap
-          run: docker buildx version
+          run: -|
+            jq --arg experimental enabled '. + {experimental: $experimental}' $HOME/.docker/config.json > $HOME/.docker/config.json
+            docker buildx version
+            
