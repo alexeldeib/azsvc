@@ -16,6 +16,7 @@ jobs:
             AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
             AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
             SSH_KEY: ${{ secrets.SSH_KEY }}
+            KUSTOMIZE_VERSION: v3.5.4
         steps:
         - uses: actions/checkout@master
         - name: install kustomize
@@ -25,28 +26,25 @@ jobs:
             mkdir ${HOME}/kustomize
             cd ${HOME}/kustomize
             go mod init tmp
-            go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4
-            which kustomize
-            rm -f $(which kustomize)
+            go get sigs.k8s.io/kustomize/kustomize/v3@${KUSTOMIZE_VERSION}
             cd ${HOME}
             rm -rf ${HOME}/kustomize
-        - name: install kustomize
-          run: |
-            export $PATH=$PATH:$(go env GOPATH)/bin
-            go env
-            mkdir ${HOME}/kustomize
-            cd ${HOME}/kustomize
-            git clone https://github.com/kubernetes-sigs/kustomize .
-            git checkout kustomize/v3.5.4
-            cd kustomize
-            go install .
-            ls $(go env GOPATH)/bin
             kustomize
-            cd ${HOME}
-            rm -rf ${HOME}/kustomize
+        # - name: install kustomize
+        #   run: |
+        #     export PATH=$PATH:$(go env GOPATH)/bin
+        #     go env
+        #     mkdir ${HOME}/kustomize
+        #     cd ${HOME}/kustomize
+        #     git clone https://github.com/kubernetes-sigs/kustomize .
+        #     git checkout kustomize/${KUSTOMIZE_VERSION}
+        #     cd kustomize
+        #     go install .
+        #     cd ${HOME}
+        #     rm -rf ${HOME}/kustomize
+        #     kustomize
         - name: bootstrap
           run: |
-            
             go run ./cmd/bootstrap/bootstrap.go -f ./cmd/bootstrap/config.yaml --app ${AZURE_CLIENT_ID} --tenant ${AZURE_TENANT_ID} --key ${AZURE_CLIENT_SECRET}
             kubectl --kubeconfig ./kubeconfig create secret generic flux-git-deploy --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
             kustomize build ./cmd/bootstrap/manifests | kubectl --kubeconfig ./kubeconfig apply -f -
