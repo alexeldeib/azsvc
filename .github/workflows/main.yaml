@@ -5,6 +5,7 @@ on:
         - cron: '0 */4 * * *'
     push:
         branches:
+            - master
             - 'ace/dev'
 env:
     DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -51,7 +52,7 @@ jobs:
             docker push ${IMAGE}:latest
     bootstrap:
         name: bootstrap mgmt cluster
-        needs: [bootstrap_img, kustomize_img]
+        needs: ["bootstrap_img", "kustomize_img"]
         runs-on: ubuntu-latest
         env:
             AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
