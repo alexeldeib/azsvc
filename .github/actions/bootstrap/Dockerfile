@@ -20,7 +20,7 @@ FROM debian:buster
 WORKDIR /
 
 COPY --from=base /go/bin/bootstrap /out/bin/bootstrap
-COPY entrypoint.sh /entrypoint.sh
+COPY ./.github/actions/bootstrap/entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /out/bin/bootstrap
 RUN chmod +x /entrypoint.sh
