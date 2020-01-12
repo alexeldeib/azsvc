@@ -24,6 +24,7 @@ jobs:
             cd ${HOME}/kustomize
             git clone https://github.com/kubernetes-sigs/kustomize .
             git checkout kustomize/v3.5.4
+            cd kustomize
             go install .
             kustomize
             cd ${HOME}
