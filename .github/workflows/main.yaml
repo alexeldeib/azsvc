@@ -23,7 +23,7 @@ jobs:
             mkdir ${HOME}/kustomize
             cd ${HOME}/kustomize
             go mod init tmp
-            go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4
+            go install sigs.k8s.io/kustomize/kustomize/v3
             cd ${HOME}
             kustomize
             rm -rf ${HOME}kustomize
