@@ -26,4 +26,5 @@ RUN chmod +x /out/bin/bootstrap
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT [ "/out/bin/bootstrap" ]
-CMD [ "-f", "${FILE}", "--app", "${AZURE_CLIENT_ID}", "--tenant", "${AZURE_TENANT_ID}", "--key", "${AZURE_CLIENT_SECRET}" ]
+
+CMD [ "/bin/bash", "-c", "/out/bin/bootstrap", "-f", "${FILE}", "--app", "${AZURE_CLIENT_ID}", "--tenant", "${AZURE_TENANT_ID}", "--key", "${AZURE_CLIENT_SECRET}" ]
