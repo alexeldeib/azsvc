@@ -20,6 +20,8 @@ jobs:
         - uses: actions/checkout@master
         - name: install kustomize
           run: |
+            echo $PATH
+            go env
             mkdir ${HOME}/kustomize
             cd ${HOME}/kustomize
             git clone https://github.com/kubernetes-sigs/kustomize .
