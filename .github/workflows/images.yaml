@@ -19,6 +19,6 @@ jobs:
         - uses: actions/checkout@master
         - name: bootstrap
           run: -|
-            jq --arg experimental enabled '. + {experimental: $experimental}' $HOME/.docker/config.json > $HOME/.docker/config.json
+            jq --arg experimental enabled ". + {experimental: $experimental}" $HOME/.docker/config.json > $HOME/.docker/config.json
             docker buildx version
             
