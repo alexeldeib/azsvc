@@ -19,6 +19,6 @@ jobs:
         - uses: actions/checkout@master
         - name: bootstrap
           run: -|
-            cat ${HOME}/.docker/config.json
+            cat /github/home/.docker/config.json
             docker buildx version
             
