@@ -22,7 +22,7 @@ jobs:
           run: |
             mkdir ${HOME}/kustomize
             cd ${HOME}/kustomize
-            git clone git@github.com:kubernetes-sigs/kustomize.git .
+            git clone https://github.com:kubernetes-sigs/kustomize .
             git checkout kustomize/v3.5.4
             go install .
             kustomize
