@@ -19,6 +19,8 @@ jobs:
             KUSTOMIZE_VERSION: v3.5.4
         steps:
         - uses: actions/checkout@master
+        - name: test kubectl
+          run: kubectl --kubeconfig ./kubeconfig create secret generic flux-git-deploy --dry-run=true --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
         - name: install kustomize
           run: |
             export PATH=$PATH:$(go env GOPATH)/bin
@@ -46,6 +48,5 @@ jobs:
         - name: bootstrap
           run: |
             go run ./cmd/bootstrap/bootstrap.go -f ./cmd/bootstrap/config.yaml --app ${AZURE_CLIENT_ID} --tenant ${AZURE_TENANT_ID} --key ${AZURE_CLIENT_SECRET}
-            kubectl --kubeconfig ./kubeconfig create secret generic flux-git-deploy --dry-run=true --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
             kustomize build ./cmd/bootstrap/manifests | kubectl --kubeconfig ./kubeconfig apply -f -
- 
+            kubectl --kubeconfig ./kubeconfig create secret generic flux-git-deploy --dry-run=true --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
