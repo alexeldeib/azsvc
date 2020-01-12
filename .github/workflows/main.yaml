@@ -20,7 +20,19 @@ jobs:
         - uses: actions/checkout@master
         - name: install kustomize
           run: |
-            echo $PATH
+            export $PATH=$PATH:$(go env GOPATH)/bin
+            go env
+            mkdir ${HOME}/kustomize
+            cd ${HOME}/kustomize
+            go mod init tmp
+            go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4
+            which kustomize
+            rm -f $(which kustomize)
+            cd ${HOME}
+            rm -rf ${HOME}/kustomize
+        - name: install kustomize
+          run: |
+            export $PATH=$PATH:$(go env GOPATH)/bin
             go env
             mkdir ${HOME}/kustomize
             cd ${HOME}/kustomize
@@ -28,6 +40,7 @@ jobs:
             git checkout kustomize/v3.5.4
             cd kustomize
             go install .
+            ls $(go env GOPATH)/bin
             kustomize
             cd ${HOME}
             rm -rf ${HOME}/kustomize
