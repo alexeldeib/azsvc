@@ -22,11 +22,12 @@ jobs:
           run: |
             mkdir ${HOME}/kustomize
             cd ${HOME}/kustomize
-            go mod init tmp
-            go install sigs.k8s.io/kustomize/kustomize/v3
-            cd ${HOME}
+            git clone git@github.com:kubernetes-sigs/kustomize.git .
+            git checkout kustomize/v3.5.4
+            go install .
             kustomize
-            rm -rf ${HOME}kustomize
+            cd ${HOME}
+            rm -rf ${HOME}/kustomize
         - name: bootstrap
           run: |
             
