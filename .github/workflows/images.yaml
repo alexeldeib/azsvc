@@ -22,6 +22,7 @@ jobs:
         - name: docker build and push
           run: |
             TAG=$(date -Iseconds | tr : - )
+            echo $TAG
             docker build -f ./.github/actions/bootstrap/Dockerfile ./.github/actions/bootstrap  -t alexeldeib/azsvc-bootstrap:${TAG}
             docker tag alexeldeib/azsvc-bootstrap:${TAG} alexeldeib/azsvc-bootstrap:latest
             docker push alexeldeib/azsvc-bootstrap:${TAG}
