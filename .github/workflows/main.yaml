@@ -4,6 +4,8 @@ on:
     # schedule daily for 3am PST == 11 UTC
     schedule:
         - cron: '0 */4 * * *'
+    branches:
+        - ace/dev
         
 jobs:
     bootstrap:
