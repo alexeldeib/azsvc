@@ -12,7 +12,8 @@ jobs:
         name: build bootstrap image
         runs-on: ubuntu-latest
         env:
-            
+            DOCKER_USER: ${{ secrets.DOCKER_USER }}
+            DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
         steps:
         - uses: actions/checkout@master
         - name: bootstrap
