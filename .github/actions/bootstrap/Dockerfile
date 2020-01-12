@@ -14,4 +14,4 @@ WORKDIR /
 COPY --from=base /go/bin/kustomize /out/bin/kustomize
 COPY entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT [ "entrypoint.sh" ]
+ENTRYPOINT [ "/entrypoint.sh" ]

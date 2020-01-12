@@ -1,0 +1,29 @@
+name: build action images
+
+on:
+    schedule:
+        - cron: '0 0 * * *'
+    push:
+        branches:
+            - master
+            - 'ace/dev'
+
+jobs:
+    bootstrap:
+        name: build bootstrap image
+        runs-on: ubuntu-latest
+        env:
+            DOCKER_USER: ${{ secrets.DOCKER_USER }}
+            DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+        steps:
+        - uses: actions/checkout@master
+        - name: docker login
+          run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+        - name: docker build and push
+          run: |
+            TAG=$(date.exe -Iseconds) | tr : -)
+            docker build -f ./.github/actions/bootstrap/Dockerfile ./.github/actions/bootstrap  -t alexeldeib/azsvc-bootstrap:${TAG}
+            docker tag alexeldeib/azsvc-bootstrap:${TAG} alexeldeib/azsvc-bootstrap:latest
+            docker push alexeldeib/azsvc-bootstrap:${TAG}
+            docker push alexeldeib/azsvc-bootstrap:latest
+            
