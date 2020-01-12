@@ -11,8 +11,6 @@ COPY api api
 COPY pkg pkg
 COPY cmd cmd
 
-RUN ls
-
 RUN cd ./cmd/bootstrap && go build -o /go/bin/bootstrap .
 
 FROM debian:buster
@@ -25,6 +23,4 @@ COPY ./.github/actions/bootstrap/entrypoint.sh /entrypoint.sh
 RUN chmod +x /out/bin/bootstrap
 RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT [ "/out/bin/bootstrap" ]
-
-CMD [ "/bin/bash", "-c", "/out/bin/bootstrap", "-f", "${FILE}", "--app", "${AZURE_CLIENT_ID}", "--tenant", "${AZURE_TENANT_ID}", "--key", "${AZURE_CLIENT_SECRET}" ]
+ENTRYPOINT [ "/bin/bash", "-c", "/out/bin/bootstrap", "-f", "${FILE}", "--app", "${AZURE_CLIENT_ID}", "--tenant", "${AZURE_TENANT_ID}", "--key", "${AZURE_CLIENT_SECRET}" ]
