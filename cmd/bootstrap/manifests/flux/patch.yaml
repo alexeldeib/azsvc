@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flux
+  namespace: flux
+spec:
+  template:
+    spec:
+      containers:
+        - name: flux
+          args:
+            - --manifest-generation=true
+            - --memcached-hostname=memcached.flux
+            - --memcached-service=
+            - --k8s-secret-name=git-deploy-key
+            - --ssh-keygen-dir=/var/fluxd/keygen
+            - --git-branch=ace/dev
+            - --git-path=scenarios
+            - --git-user=alexeldeib
+            - --git-email=alexeldeib@gmail.com
+            - --git-url=https://$(GIT_AUTHUSER):$(GIT_AUTHKEY)@github.com/alexeldeib/azsvc.git
+            - --registry-exclude-image=*
+          env:
+            - name: GIT_AUTHUSER
+                valueFrom:
+                secretKeyRef:
+                    name: git-deploy-key
+                    key: user
+            - name: GIT_AUTHKEY
+                valueFrom:
+                secretKeyRef:
+                    name: git-deploy-key
+                    key: key
