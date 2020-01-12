@@ -19,7 +19,7 @@ jobs:
             KUSTOMIZE_VERSION: v3.5.4
         steps:
         - uses: actions/checkout@master
-        - uses: docker://alexeldeib/azsvc-bootstrap@latest
+        - uses: docker://alexeldeib/azsvc-bootstrap:latest
         # - name: install kustomize
         #   run: |
         #     export PATH=$PATH:${HOME}/bin
