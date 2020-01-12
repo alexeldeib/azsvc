@@ -1,0 +1,4 @@
+name: "install kustomize"
+runs:
+    using: 'docker'
+    image: 'Dockerfile'
