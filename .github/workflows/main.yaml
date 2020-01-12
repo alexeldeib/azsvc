@@ -6,8 +6,49 @@ on:
     push:
         branches:
             - 'ace/dev'
-        
+env:
+    DOCKER_USER: ${{ secrets.DOCKER_USER }}
+    DOCKER_PASS: ${{ secrets.DOCKER_PASS }}       
+
 jobs:
+    kustomize_img:
+        name: build kustomize installer
+        runs-on: ubuntu-latest
+        env:
+            IMAGE: alexeldeib/azsvc-kustomize
+            CONTEXT: ./.github/actions/kustomize
+            DOCKERFILE: ./.github/actions/kustomize/Dockerfile
+        steps:
+        - uses: actions/checkout@master
+        - name: docker login
+          run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+        - name: docker build and push
+          run: |
+            TAG=$(date -Iseconds | tr +: - )
+            echo $TAG
+            docker build -f ${DOCKERFILE} ${CONTEXT}  -t ${IMAGE}:${TAG}
+            docker tag ${IMAGE}:${TAG} ${IMAGE}:latest
+            docker push ${IMAGE}:${TAG}
+            docker push ${IMAGE}:latest
+    bootstrap_img:
+        name: build bootstrap installer
+        runs-on: ubuntu-latest
+        env:
+            IMAGE: alexeldeib/azsvc-bootstrap
+            CONTEXT: .
+            DOCKERFILE: ./.github/actions/bootstrap/Dockerfile
+        steps:
+        - uses: actions/checkout@master
+        - name: docker login
+          run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+        - name: docker build and push
+          run: |
+            TAG=$(date -Iseconds | tr +: - )
+            echo $TAG
+            docker build -f ${DOCKERFILE} ${CONTEXT}  -t ${IMAGE}:${TAG}
+            docker tag ${IMAGE}:${TAG} ${IMAGE}:latest
+            docker push ${IMAGE}:${TAG}
+            docker push ${IMAGE}:latest
     bootstrap:
         name: bootstrap mgmt cluster
         runs-on: ubuntu-latest
@@ -51,6 +92,6 @@ jobs:
         - name: bootstrap
           run: |
             export PATH=$PATH:${HOME}/bin
-            go run ./cmd/bootstrap/bootstrap.go -f ./cmd/bootstrap/config.yaml --app ${AZURE_CLIENT_ID} --tenant ${AZURE_TENANT_ID} --key ${AZURE_CLIENT_SECRET}
+            ${GITHUB_WORKSPACE}/bin/bootstrap -f ./cmd/bootstrap/config.yaml --app ${AZURE_CLIENT_ID} --tenant ${AZURE_TENANT_ID} --key ${AZURE_CLIENT_SECRET}
             kustomize build ./config/flux | kubectl --kubeconfig ./kubeconfig apply -f -
             kubectl --kubeconfig ./kubeconfig create secret generic -n flux flux-git-deploy --dry-run=true --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
