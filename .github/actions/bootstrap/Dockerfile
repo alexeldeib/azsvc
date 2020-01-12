@@ -7,7 +7,7 @@ WORKDIR /bin/kustomize
 RUN go mod init kustomize
 RUN go get sigs.k8s.io/kustomize/kustomize/v3@${KUSTOMIZE_VERSION}
 
-FROM busybox:1.31.1-glibc
+FROM debian:buster
 
 WORKDIR /
 
