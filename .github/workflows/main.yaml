@@ -17,15 +17,11 @@ jobs:
             AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
             SSH_KEY: ${{ secrets.SSH_KEY }}
             KUSTOMIZE_VERSION: v3.5.4
+            FILE: ${GITHUB_WORKSPACE}/cmd/bootstrap/config.yaml
         steps:
         - uses: actions/checkout@master
         - uses: docker://alexeldeib/azsvc-kustomize:latest
         - uses: docker://alexeldeib/azsvc-bootstrap:latest
-          with:
-            app: ${AZURE_CLIENT_ID}    
-            tenant: ${AZURE_TENANT_ID}    
-            key: ${AZURE_CLIENT_SECRET}
-            file: ${GITHUB_WORKSPACE}/cmd/bootstrap/config.yaml
         # - name: install kustomize
         #   run: |
         #     export PATH=$PATH:${HOME}/bin
