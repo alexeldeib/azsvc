@@ -20,7 +20,7 @@ jobs:
         - uses: actions/checkout@master
         - name: install kustomize
           run: |
-            export $PATH=$PATH:$(go env GOPATH)/bin
+            export PATH=$PATH:$(go env GOPATH)/bin
             go env
             mkdir ${HOME}/kustomize
             cd ${HOME}/kustomize
