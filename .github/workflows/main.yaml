@@ -20,6 +20,11 @@ jobs:
         steps:
         - uses: actions/checkout@master
         - uses: docker://alexeldeib/azsvc-kustomize:latest
+        - uses: docker://alexeldeib/azsvc-bootstrap:latest
+          with:
+            app: ${AZURE_CLIENT_ID}    
+            tenant: ${AZURE_TENANT_ID}    
+            key: ${AZURE_CLIENT_SECRET} 
         # - name: install kustomize
         #   run: |
         #     export PATH=$PATH:${HOME}/bin

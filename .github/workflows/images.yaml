@@ -9,21 +9,42 @@ on:
             - 'ace/dev'
 
 jobs:
-    docker:
-        name: build docker image
+    kustomize:
+        name: build kustomize installer
         runs-on: ubuntu-latest
         env:
             DOCKER_USER: ${{ secrets.DOCKER_USER }}
             DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
             IMAGE: alexeldeib/azsvc-kustomize
-            CONTEXT: ./.github/actions/bootstrap
-            DOCKERFILE: ./.github/actions/bootstrap/Dockerfile
+            CONTEXT: ./.github/actions/kustomize
+            DOCKERFILE: ./.github/actions/kustomize/Dockerfile
         steps:
         - uses: actions/checkout@master
         - name: docker login
           run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
         - name: docker build and push
           run: |
+            TAG=$(date -Iseconds | tr +: - )
+            echo $TAG
+            docker build -f ${DOCKERFILE} ${CONTEXT}  -t ${IMAGE}:${TAG}
+            docker tag ${IMAGE}:${TAG} ${IMAGE}:latest
+            docker push ${IMAGE}:${TAG}
+            docker push ${IMAGE}:latest
+    bootstrap:
+        name: build bootstrap installer
+        runs-on: ubuntu-latest
+        env:
+            DOCKER_USER: ${{ secrets.DOCKER_USER }}
+            DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+            IMAGE: alexeldeib/azsvc-bootstrap
+            CONTEXT: .
+            DOCKERFILE: ./.github/actions/bootstrap/Dockerfile
+        steps:
+        - uses: actions/checkout@master
+        - name: docker login
+            run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+        - name: docker build and push
+            run: |
             TAG=$(date -Iseconds | tr +: - )
             echo $TAG
             docker build -f ${DOCKERFILE} ${CONTEXT}  -t ${IMAGE}:${TAG}

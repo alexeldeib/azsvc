@@ -1,0 +1,26 @@
+name: "install bootstrapper"
+runs:
+    using: 'docker'
+    image: 'Dockerfile'
+    args:
+    - --app
+    - ${{ inputs.app }}
+    - --key
+    - ${{ inputs.key }}
+    - --tenant
+    - ${{ inputs.tenant }}
+    - -f
+    - ${{ inputs.file }}
+inputs:
+    app:
+        description: "id of application to authenticate with"
+        required: true
+    key:
+        description: "secret of application to authenticate with"
+        required: true
+    tenant:
+        description: "id of home tenant of application to authenticate with"
+        required: true
+    file:
+        description: "file containing cluster configuration to bootstrap"
+        required: true
