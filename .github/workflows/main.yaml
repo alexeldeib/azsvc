@@ -3,9 +3,9 @@ name: bootstrap soak test mgmt cluster
 on:
     schedule:
         - cron: '0 */4 * * *'
-    branches:
-        - master
-        - 'ace/dev'
+    push:
+        branches:
+            - 'ace/dev'
         
 jobs:
     bootstrap:
