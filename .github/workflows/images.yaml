@@ -42,9 +42,9 @@ jobs:
         steps:
         - uses: actions/checkout@master
         - name: docker login
-            run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+          run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
         - name: docker build and push
-            run: |
+          run: |
             TAG=$(date -Iseconds | tr +: - )
             echo $TAG
             docker build -f ${DOCKERFILE} ${CONTEXT}  -t ${IMAGE}:${TAG}
