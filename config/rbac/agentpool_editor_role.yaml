@@ -1,0 +1,24 @@
+# permissions for end users to edit agentpools.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: agentpool-editor-role
+rules:
+- apiGroups:
+  - azure.alexeldeib.xyz
+  resources:
+  - agentpools
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - azure.alexeldeib.xyz
+  resources:
+  - agentpools/status
+  verbs:
+  - get
