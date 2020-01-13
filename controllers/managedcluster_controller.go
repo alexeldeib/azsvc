@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 
 	"github.com/go-logr/logr"
+	"github.com/sanity-io/litter"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -122,6 +123,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 		return ctrl.Result{}, failure
 	}
 
+	var requeue bool
 	// We may want to store the Kubeconfig from the ManagedCluster in a Kubernetes secret.
 	// Alternatively, we may need the Kubeconfig to apply some Kustomization workloads against the cluster.
 	if obj.Spec.KubeconfigRef != nil || obj.Spec.Kustomizations != nil {
@@ -150,7 +152,6 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 		}
 
 		// BEGIN Kustomization
-
 		// Build and apply kustomized objects
 		if obj.Spec.Kustomizations != nil {
 			// Construct remote client
@@ -163,7 +164,9 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			if err != nil {
 				return ctrl.Result{}, err
 			}
-			kubeclient, err := client.New(restClient, client.Options{})
+			kubeclient, err := client.New(restClient, client.Options{
+				Scheme: r.Scheme,
+			})
 			if err != nil {
 				return ctrl.Result{}, err
 			}
@@ -173,7 +176,9 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			// ace: could not find anything persisted to disk (uses /tmp/kustomize**** and files are deleted)
 			// ace: in memory version of filesys did not work on initial attempt
 			fs := filesys.MakeFsOnDisk()
-			kustomizer := krusty.MakeKustomizer(fs, krusty.MakeDefaultOptions())
+			koptions := krusty.MakeDefaultOptions()
+			// koptions.DoLegacyResourceSort = false
+			kustomizer := krusty.MakeKustomizer(fs, koptions)
 
 			// Potentially we may have many kustomizations to apply.
 			for _, path := range obj.Spec.Kustomizations {
@@ -200,7 +205,16 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 						// Note that we are ignoring runtime.IsNotRegisteredError, because we want to use unstructured
 						// TODO(ace): test this...may need reworking for the intended purpose
 						// n.b.: github.com/kubernetes/cli-runtime can do the unstructured with its resource builder...check that out
-					} else if err != nil && !runtime.IsNotRegisteredError(err) {
+					} else if err != nil {
+						if runtime.IsNotRegisteredError(err) {
+							if obj != nil {
+								log.Error(err, "failed to recognize object")
+								litter.Dump(obj)
+								requeue = true
+							}
+							continue
+						}
+						// } else if err != nil && !runtime.IsNotRegisteredError(err) {
 						return ctrl.Result{}, err
 					}
 					objects = append(objects, obj)
@@ -217,7 +231,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 		// END Kustomization
 	}
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{Requeue: requeue}, nil
 }
 
 func (r *ManagedClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
