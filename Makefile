@@ -55,7 +55,7 @@ generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 # Build the docker image
-docker-build: manifests
+docker-build: fmt manifests
 	docker build . -t ${IMG}:latest
 
 # Push the docker image

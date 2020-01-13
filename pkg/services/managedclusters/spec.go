@@ -41,9 +41,9 @@ func defaultSpec() *Spec {
 }
 
 func (s *Spec) Set(options ...specOption) {
-// 	// Willfully ignoring errors :(
-// 	old, _ := s.internal.MarshalJSON()
-// 	_ = s.old.UnmarshalJSON(old)
+	// 	// Willfully ignoring errors :(
+	// 	old, _ := s.internal.MarshalJSON()
+	// 	_ = s.old.UnmarshalJSON(old)
 	for _, option := range options {
 		s = option(s)
 	}
