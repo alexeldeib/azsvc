@@ -1,7 +1,6 @@
 namespace: flux-clusters
 nameSuffix: -clusters
 bases:
-- ns.yaml
-- ../base
+  - github.com/fluxcd/flux/deploy?ref=v1.17.0
 patchesStrategicMerge:
   - patch.yaml

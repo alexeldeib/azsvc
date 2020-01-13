@@ -111,17 +111,18 @@ func main() {
 
 	var failed bool
 	for i := range object.Spec.AgentPools {
-		val := object.Spec.AgentPools[i]
-		val.SubscriptionID = object.Spec.SubscriptionID
-		val.ResourceGroup = object.Spec.ResourceGroup
-		val.Cluster = object.Spec.Name
 		pool := &v1alpha1.AgentPool{
-			Spec: val,
+			Spec: v1alpha1.AgentPoolSpec{
+				SubscriptionID:    object.Spec.SubscriptionID,
+				ResourceGroup:     object.Spec.ResourceGroup,
+				Cluster:           object.Spec.Name,
+				AgentPoolTemplate: object.Spec.AgentPools[i],
+			},
 		}
 		log := log.WithValues("agentpool", pool.Spec.Name)
 		if err := agentpools.NewService(authorizer).Ensure(context.Background(), log, pool); err != nil {
 			failed = true
-			log.Error(err, fmt.Sprintf("failed to updated agent pool: %s", val.Name))
+			log.Error(err, fmt.Sprintf("failed to updated agent pool: %s", pool.Spec.Name))
 		}
 	}
 
