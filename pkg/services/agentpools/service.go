@@ -69,7 +69,7 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Age
 	fmt.Printf("update required (+want -have):\n%s", diff)
 
 	log.Info("beginning long create/update operation")
-	future, err := client.CreateOrUpdate(ctx, obj.Spec.ResourceGroup, obj.Spec.Cluster, obj.Spec.Name, spec.internal)
+	future, err := client.CreateOrUpdate(ctx, obj.Spec.ResourceGroup, obj.Spec.Cluster, obj.Spec.Name, *spec.internal)
 	if err != nil {
 		return err
 	}
@@ -111,6 +111,6 @@ func (s *Service) Get(ctx context.Context, subscriptionID, resourceGroup, cluste
 	}
 
 	return &Spec{
-		internal: result,
+		internal: &result,
 	}, nil
 }

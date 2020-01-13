@@ -62,7 +62,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 	log := r.Log.WithValues("managedcluster", req.NamespacedName)
 
 	obj := &azurev1alpha1.ManagedCluster{}
-	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
+	if err := r.Client.Get(ctx, req.NamespacedName, obj); client.IgnoreNotFound(err) != nil {
 		return ctrl.Result{}, err
 	}
 

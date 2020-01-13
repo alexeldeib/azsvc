@@ -3,6 +3,7 @@ package managedclusters
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/Azure/go-autorest/autorest"
@@ -10,6 +11,7 @@ import (
 	"github.com/alexeldeib/azsvc/api/v1alpha1"
 	azerr "github.com/alexeldeib/azsvc/pkg/errors"
 	"github.com/go-logr/logr"
+	"github.com/sanity-io/litter"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -74,8 +76,15 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Man
 		}
 	}
 
+	if spec.internal.ProvisioningState != nil && *spec.internal.ProvisioningState != "Succeeded" {
+		return fmt.Errorf("resource still in provisioning state: %s", *spec.internal.ProvisioningState)
+	}
+
 	diff := spec.Diff()
 	if diff == "" {
+		litter.Config.FieldExclusions = regexp.MustCompile(`Response`)
+		litter.Dump(spec.old)
+		litter.Dump(spec.internal)
 		log.V(1).Info("no update required, found and desired objects equal")
 		return nil
 	}

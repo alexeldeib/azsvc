@@ -41,7 +41,10 @@ func defaultSpec() *Spec {
 }
 
 func (s *Spec) Set(options ...specOption) {
+	// old, _ := s.internal.MarshalJSON()
+	// _ = s.old.UnmarshalJSON(old)
 	s.old = s.internal
+	// s.old = old
 	for _, option := range options {
 		s = option(s)
 	}

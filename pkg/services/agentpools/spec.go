@@ -15,23 +15,24 @@ type Spec struct {
 	subscriptionID string
 	group          string
 	cluster        string
-	internal       containerservice.AgentPool
-	old            containerservice.AgentPool
+	internal       *containerservice.AgentPool
+	old            *containerservice.AgentPool
 }
 
 func defaultSpec() *Spec {
 	result := &Spec{
-		internal: containerservice.AgentPool{
+		internal: &containerservice.AgentPool{
 			ManagedClusterAgentPoolProfileProperties: &containerservice.ManagedClusterAgentPoolProfileProperties{
 				Type: containerservice.VirtualMachineScaleSets,
 			},
 		},
+		old: &containerservice.AgentPool{},
 	}
 	return result
 }
 
 func (s *Spec) Set(options ...specOption) {
-	s.old = s.internal
+	*s.old = *s.internal
 	for _, option := range options {
 		s = option(s)
 	}
