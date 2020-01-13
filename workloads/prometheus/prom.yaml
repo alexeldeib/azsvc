@@ -49314,7 +49314,7 @@ spec:
           args:
             - patch
             - --webhook-name=prom-prometheus-operator-admission
-            - --namespace=default
+            - --namespace=prometheus
             - --secret-name=prom-prometheus-operator-admission
             - --patch-failure-policy=Fail
           resources:
