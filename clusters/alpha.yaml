@@ -22,4 +22,4 @@ spec:
     replicas: 1
     osDiskSizeGb: 500
   kustomizations:
-  - https://sigs.k8s.io/kustomize/examples/helloWorld
+  - https://github.com/fluxcd/flux/deploy?ref=v1.17.0
