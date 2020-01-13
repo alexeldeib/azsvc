@@ -49272,8 +49272,8 @@ spec:
           imagePullPolicy: 
           args:
             - create
-            - --host=prom-prometheus-operator-operator,prom-prometheus-operator-operator.default.svc
-            - --namespace=default
+            - --host=prom-prometheus-operator-operator,prom-prometheus-operator-operator.prometheus.svc
+            - --namespace=prometheus
             - --secret-name=prom-prometheus-operator-admission
           resources:
             {}
