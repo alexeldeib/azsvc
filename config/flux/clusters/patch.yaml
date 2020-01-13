@@ -9,7 +9,6 @@ spec:
       containers:
         - name: flux
           args:
-            - --manifest-generation=true
             - --memcached-hostname=memcached-clusters.flux-clusters
             - --memcached-service=
             - --k8s-secret-name=flux-git-deploy
