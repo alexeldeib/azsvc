@@ -14,7 +14,7 @@ spec:
             - --memcached-service=
             - --k8s-secret-name=flux-git-deploy
             - --ssh-keygen-dir=/var/fluxd/keygen
-            - --git-branch=ace/dev
+            - --git-branch=ace/svc-dev
             - --git-path=config/default
             - --git-user=alexeldeib
             - --git-email=alexeldeib@gmail.com

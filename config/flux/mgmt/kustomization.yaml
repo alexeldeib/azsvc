@@ -1,0 +1,7 @@
+namespace: flux-mgmt
+nameSuffix: -mgmt
+bases:
+- ns.yaml
+- ../base
+patchesStrategicMerge:
+  - patch.yaml

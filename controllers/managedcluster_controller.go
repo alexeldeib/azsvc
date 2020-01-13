@@ -76,7 +76,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 	} else {
 		log.V(2).Info("checking for finalizer")
 		if finalizer.Has(obj, constants.Finalizer) {
-			log.Info("finalizer present, invoking actuator deletion")
+			log.Info("finalizer present, invoking deletion")
 			if err := r.ClusterService.Delete(ctx, log, obj); err != nil {
 				return ctrl.Result{}, err
 			}
@@ -166,6 +166,9 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			}
 
 			// Initialize for kustomization
+			// TODO(ace): does this persist anything on disk, can we use in memory instead
+			// ace: could not find anything persisted to disk (uses /tmp/kustomize**** and files are deleted)
+			// ace: in memory version of filesys did not work on initial attempt
 			fs := filesys.MakeFsOnDisk()
 			kustomizer := krusty.MakeKustomizer(fs, krusty.MakeDefaultOptions())
 

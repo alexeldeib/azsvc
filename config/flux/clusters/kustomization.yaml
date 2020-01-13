@@ -1,0 +1,7 @@
+namespace: flux-clusters
+nameSuffix: -clusters
+bases:
+- ns.yaml
+- ../base
+patchesStrategicMerge:
+  - patch.yaml
