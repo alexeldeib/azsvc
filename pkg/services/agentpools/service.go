@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/services/containerservice/mgmt/2019-11-01/containerservice"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -105,12 +106,13 @@ func (s *Service) Get(ctx context.Context, subscriptionID, resourceGroup, cluste
 	result, err := client.get(ctx, resourceGroup, cluster, name)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			return defaultSpec(), nil
+			return defaultSpec(name), nil
 		}
 		return nil, err
 	}
 
 	return &Spec{
 		internal: &result,
+		old:      &containerservice.AgentPool{},
 	}, nil
 }

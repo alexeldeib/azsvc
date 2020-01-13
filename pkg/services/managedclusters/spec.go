@@ -14,14 +14,15 @@ type specOption func(*Spec) *Spec
 type Spec struct {
 	subscriptionID string
 	group          string
-	internal       containerservice.ManagedCluster
-	old            containerservice.ManagedCluster
+	internal       *containerservice.ManagedCluster
+	old            *containerservice.ManagedCluster
 	future         []byte
 }
 
-func defaultSpec() *Spec {
+func defaultSpec(name string) *Spec {
 	result := &Spec{
-		internal: containerservice.ManagedCluster{
+		internal: &containerservice.ManagedCluster{
+			Name: &name,
 			ManagedClusterProperties: &containerservice.ManagedClusterProperties{
 				LinuxProfile: &containerservice.LinuxProfile{
 					AdminUsername: &defaultUser,
@@ -36,15 +37,13 @@ func defaultSpec() *Spec {
 				},
 			},
 		},
+		old: &containerservice.ManagedCluster{},
 	}
 	return result
 }
 
 func (s *Spec) Set(options ...specOption) {
-	// old, _ := s.internal.MarshalJSON()
-	// _ = s.old.UnmarshalJSON(old)
-	s.old = s.internal
-	// s.old = old
+	*s.old = *s.internal
 	for _, option := range options {
 		s = option(s)
 	}

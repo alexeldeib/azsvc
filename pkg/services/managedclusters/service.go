@@ -3,15 +3,14 @@ package managedclusters
 import (
 	"context"
 	"fmt"
-	"regexp"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/services/containerservice/mgmt/2019-11-01/containerservice"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
 	"github.com/alexeldeib/azsvc/api/v1alpha1"
 	azerr "github.com/alexeldeib/azsvc/pkg/errors"
 	"github.com/go-logr/logr"
-	"github.com/sanity-io/litter"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -76,31 +75,20 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Man
 		}
 	}
 
-	if spec.internal.ProvisioningState != nil && *spec.internal.ProvisioningState != "Succeeded" {
+	if spec.internal.ProvisioningState != nil && *spec.internal.ProvisioningState != "Succeeded" && *spec.internal.ProvisioningState != "Failed" {
 		return fmt.Errorf("resource still in provisioning state: %s", *spec.internal.ProvisioningState)
 	}
 
 	diff := spec.Diff()
-	if diff == "" {
-		litter.Config.FieldExclusions = regexp.MustCompile(`Response`)
-		litter.Dump(spec.old)
-		litter.Dump(spec.internal)
+	if diff == "" && *spec.internal.ProvisioningState != "Failed" {
 		log.V(1).Info("no update required, found and desired objects equal")
 		return nil
 	}
 	fmt.Printf("update required (+want -have):\n%s", diff)
 
 	log.V(1).Info("beginning long create/update operation")
-	_, err = client.createOrUpdate(ctx, log, obj.Spec.ResourceGroup, obj.Spec.Name, spec.internal)
+	_, err = client.createOrUpdate(ctx, log, obj.Spec.ResourceGroup, obj.Spec.Name, *spec.internal)
 	return err
-	// return wait.ExponentialBackoff(backoff(), func() (done bool, err error) {
-	// 	log.Info("reconciling with backoff")
-	// 	done, err = future.DoneWithContext(ctx, client)
-	// 	if err != nil {
-	// 		log.Error(err, "failed reconcile attempt")
-	// 	}
-	// 	return done && err == nil, nil
-	// })
 }
 
 func (s *Service) Delete(ctx context.Context, log logr.Logger, obj *v1alpha1.ManagedCluster) error {
@@ -119,15 +107,6 @@ func (s *Service) Delete(ctx context.Context, log logr.Logger, obj *v1alpha1.Man
 	}
 
 	return nil
-
-	// return wait.ExponentialBackoff(backoff(), func() (done bool, err error) {
-	// 	log.Info("deleting with backoff")
-	// 	done, err = future.DoneWithContext(ctx, client)
-	// 	if err != nil {
-	// 		log.Error(err, "failed deletion attempt")
-	// 	}
-	// 	return done && err == nil, nil
-	// })
 }
 
 func (s *Service) Get(ctx context.Context, subscriptionID, resourceGroup, name string) (*Spec, error) {
@@ -139,13 +118,14 @@ func (s *Service) Get(ctx context.Context, subscriptionID, resourceGroup, name s
 	result, err := client.Get(ctx, resourceGroup, name)
 	if err != nil {
 		if azerr.IsNotFound(err) {
-			return defaultSpec(), nil
+			return defaultSpec(name), nil
 		}
 		return nil, err
 	}
 
 	return &Spec{
-		internal: result,
+		internal: &result,
+		old:      &containerservice.ManagedCluster{},
 	}, nil
 }
 
@@ -155,14 +135,4 @@ func (s *Service) GetCredentials(ctx context.Context, subscriptionID, resourceGr
 		return nil, err
 	}
 	return client.getKubeconfig(ctx, resourceGroup, name)
-	// credentialList, err := client.ListClusterAdminCredentials(ctx, resourceGroup, name)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// if credentialList.Kubeconfigs == nil || len(*credentialList.Kubeconfigs) < 1 {
-	// 	return nil, errors.New("no kubeconfigs available for the aks cluster")
-	// }
-
-	// return *(*credentialList.Kubeconfigs)[0].Value, nil
 }

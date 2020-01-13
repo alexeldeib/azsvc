@@ -39,9 +39,6 @@ func (c *client) createOrUpdate(ctx context.Context, log logr.Logger, group, nam
 	if err := poll(ctx, log, c.Client, future.Future); err != nil {
 		return containerservice.ManagedCluster{}, err
 	}
-	// if err := future.WaitForCompletionRef(ctx, c.Client); err != nil {
-	// 	return containerservice.ManagedCluster{}, err
-	// }
 	return future.Result(c.ManagedClustersClient)
 }
 

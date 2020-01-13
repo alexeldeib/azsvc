@@ -19,9 +19,10 @@ type Spec struct {
 	old            *containerservice.AgentPool
 }
 
-func defaultSpec() *Spec {
+func defaultSpec(name string) *Spec {
 	result := &Spec{
 		internal: &containerservice.AgentPool{
+			Name: &name,
 			ManagedClusterAgentPoolProfileProperties: &containerservice.ManagedClusterAgentPoolProfileProperties{
 				Type: containerservice.VirtualMachineScaleSets,
 			},
