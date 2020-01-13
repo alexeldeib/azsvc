@@ -44,7 +44,7 @@ func NewService(authorizer autorest.Authorizer, logger logr.Logger) *Service {
 	}
 }
 
-func (s *Service) Ensure(ctx context.Context, obj *v1alpha1.ManagedCluster, creds *corev1.Secret) error {
+func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.ManagedCluster, creds *corev1.Secret) error {
 	client, err := newClient(s.authorizer, obj.Spec.SubscriptionID)
 	if err != nil {
 		return err
@@ -74,17 +74,17 @@ func (s *Service) Ensure(ctx context.Context, obj *v1alpha1.ManagedCluster, cred
 		}
 	}
 
-	s.log.Info("beginning long create/update operation")
+	log.Info("beginning long create/update operation")
 	future, err := client.CreateOrUpdate(ctx, obj.Spec.ResourceGroup, obj.Spec.Name, spec.internal)
 	if err != nil {
 		return err
 	}
 
 	return wait.ExponentialBackoff(backoff(), func() (done bool, err error) {
-		s.log.Info("reconciling with backoff")
+		log.Info("reconciling with backoff")
 		done, err = future.DoneWithContext(ctx, client)
 		if err != nil {
-			s.log.Error(err, "failed reconcile attempt")
+			log.Error(err, "failed reconcile attempt")
 		}
 		return done && err == nil, nil
 	})
