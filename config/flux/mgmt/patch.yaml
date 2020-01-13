@@ -9,6 +9,7 @@ spec:
       containers:
         - name: flux
           args:
+            - --sync-garbage-collection
             - --manifest-generation=true
             - --memcached-hostname=memcached-mgmt.flux-mgmt
             - --memcached-service=

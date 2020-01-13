@@ -9,6 +9,7 @@ spec:
       containers:
         - name: flux
           args:
+            - --sync-garbage-collection
             - --memcached-hostname=memcached-clusters.flux-clusters
             - --memcached-service=
             - --k8s-secret-name=flux-git-deploy
