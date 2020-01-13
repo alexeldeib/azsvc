@@ -3,9 +3,7 @@ name: scheduled image builds
 on:
     schedule:
         - cron: '0 0 * * *'
-    push:
-        branches:
-            - 'ace/svc-dev'
+
 env:
     DOCKER_USER: ${{ secrets.DOCKER_USER }}
     DOCKER_PASS: ${{ secrets.DOCKER_PASS }}       

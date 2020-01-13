@@ -148,6 +148,8 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			}
 		}
 
+		// BEGIN Kustomization
+
 		// Build and apply kustomized objects
 		if obj.Spec.Kustomizations != nil {
 			// Construct remote client
@@ -211,6 +213,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 				}
 			}
 		}
+		// END Kustomization
 	}
 
 	return ctrl.Result{}, nil
