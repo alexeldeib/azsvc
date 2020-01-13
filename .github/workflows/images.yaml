@@ -3,19 +3,41 @@ name: scheduled image builds
 on:
     schedule:
         - cron: '0 0 * * *'
+    push:
+      branches:
+        - 'ace/svc-dev'
 
 env:
     DOCKER_USER: ${{ secrets.DOCKER_USER }}
     DOCKER_PASS: ${{ secrets.DOCKER_PASS }}       
 
 jobs:
-    kustomize:
-        name: build kustomize installer
+  kustomize:
+      name: build kustomize installer
+      runs-on: ubuntu-latest
+      env:
+          IMAGE: alexeldeib/azsvc-kustomize
+          CONTEXT: ./.github/actions/kustomize
+          DOCKERFILE: ./.github/actions/kustomize/Dockerfile
+      steps:
+      - uses: actions/checkout@master
+      - name: docker login
+        run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+      - name: docker build and push
+        run: |
+          TAG=$(date -Iseconds | tr +: - )
+          echo $TAG
+          docker build -f ${DOCKERFILE} ${CONTEXT}  -t ${IMAGE}:${TAG}
+          docker tag ${IMAGE}:${TAG} ${IMAGE}:latest
+          docker push ${IMAGE}:${TAG}
+          docker push ${IMAGE}:latest
+  manager:
+        name: build azsvc manager
         runs-on: ubuntu-latest
         env:
-            IMAGE: alexeldeib/azsvc-kustomize
-            CONTEXT: ./.github/actions/kustomize
-            DOCKERFILE: ./.github/actions/kustomize/Dockerfile
+            IMAGE: alexeldeib/azsvc
+            CONTEXT: .
+            DOCKERFILE: Dockerfile
         steps:
         - uses: actions/checkout@master
         - name: docker login
