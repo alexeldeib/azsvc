@@ -10,7 +10,7 @@ spec:
         - name: flux
           args:
             - --manifest-generation=true
-            - --memcached-hostname=memcached.flux
+            - --memcached-hostname=memcached-clusters.flux-clusters
             - --memcached-service=
             - --k8s-secret-name=flux-git-deploy
             - --ssh-keygen-dir=/var/fluxd/keygen
