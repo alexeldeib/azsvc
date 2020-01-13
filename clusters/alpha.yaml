@@ -1,7 +1,7 @@
 apiVersion: azure.alexeldeib.xyz/v1alpha1
 kind: ManagedCluster
 metadata:
-  name: mc-sample
+  name: alpha
 spec:
   subscriptionId: 8643025a-c059-4a48-85d0-d76f51d63a74
   resourceGroup: ace-test
@@ -15,7 +15,7 @@ spec:
   nodePools:
   - name: small
     sku: Standard_B2ms
-    replicas: 3
+    replicas: 1
     osDiskSizeGb: 250
   - name: main 
     sku: Standard_D4_v3
