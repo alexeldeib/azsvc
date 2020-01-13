@@ -124,7 +124,6 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 		return ctrl.Result{}, failure
 	}
 
-	var requeue bool
 	// We may want to store the Kubeconfig from the ManagedCluster in a Kubernetes secret.
 	// Alternatively, we may need the Kubeconfig to apply some Kustomization workloads against the cluster.
 	if obj.Spec.KubeconfigRef != nil || obj.Spec.Kustomizations != nil {
@@ -211,7 +210,6 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 							if obj != nil {
 								log.Error(err, "failed to recognize object")
 								litter.Dump(obj)
-								requeue = true
 							}
 							continue
 						}
