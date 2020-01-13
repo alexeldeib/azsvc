@@ -54,6 +54,7 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Age
 	spec.Set(
 		Name(obj.Spec.Name),
 		SKU(obj.Spec.SKU),
+		Count(obj.Spec.Replicas),
 		Cluster(obj.Spec.Cluster),
 		SubscriptionID(obj.Spec.SubscriptionID),
 		ResourceGroup(obj.Spec.ResourceGroup),
