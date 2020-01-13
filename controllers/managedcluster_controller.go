@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/sanity-io/litter"
@@ -231,7 +232,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 		// END Kustomization
 	}
 
-	return ctrl.Result{Requeue: requeue}, nil
+	return ctrl.Result{RequeueAfter: time.Second * 60}, nil
 }
 
 func (r *ManagedClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
