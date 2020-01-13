@@ -18,6 +18,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	go.uber.org/zap v1.13.0
 	k8s.io/api v0.17.0
+	k8s.io/apiextensions-apiserver v0.0.0-20190918161926-8f644eb6e783
 	k8s.io/apimachinery v0.17.0
 	k8s.io/cli-runtime v0.17.0
 	k8s.io/client-go v0.17.0
