@@ -1,2 +1,4 @@
+*.exe
+
 sp.json
 azsvc-action*
