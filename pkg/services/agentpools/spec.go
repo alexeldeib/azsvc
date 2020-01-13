@@ -31,7 +31,9 @@ func defaultSpec() *Spec {
 }
 
 func (s *Spec) Set(options ...specOption) {
-	s.old = s.internal
+	// // Willfully ignoring errors :(
+	// old, _ := s.internal.MarshalJSON()
+	// _ = s.old.UnmarshalJSON(old)
 	for _, option := range options {
 		s = option(s)
 	}
@@ -45,7 +47,7 @@ func (s *Spec) Diff() string {
 	ignored := []cmp.Option{
 		cmpopts.IgnoreFields(containerservice.AgentPool{}, "Response"),
 	}
-	return cmp.Diff(s.internal, s.old, ignored...)
+	return cmp.Diff(s.old, s.internal, ignored...)
 }
 
 func Name(name string) specOption {

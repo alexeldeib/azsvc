@@ -76,12 +76,13 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Man
 	}
 
 	diff := spec.Diff()
+	litter.Dump(spec.old)
 	litter.Dump(spec.internal.ManagedClusterProperties)
 	if diff == "" {
 		log.V(1).Info("no update required, found and desired objects equal")
 		return nil
 	}
-	fmt.Printf("update required (+new -old):\n%s", diff)
+	fmt.Printf("update required (+want -have):\n%s", diff)
 
 	log.V(1).Info("beginning long create/update operation")
 	_, err = client.createOrUpdate(ctx, log, obj.Spec.ResourceGroup, obj.Spec.Name, spec.internal)

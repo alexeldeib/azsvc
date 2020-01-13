@@ -66,7 +66,7 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Age
 		log.V(1).Info("no update required, found and desired objects equal")
 		return nil
 	}
-	fmt.Printf("update required (+new -old):\n%s", diff)
+	fmt.Printf("update required (+want -have):\n%s", diff)
 
 	log.Info("beginning long create/update operation")
 	future, err := client.CreateOrUpdate(ctx, obj.Spec.ResourceGroup, obj.Spec.Cluster, obj.Spec.Name, spec.internal)
