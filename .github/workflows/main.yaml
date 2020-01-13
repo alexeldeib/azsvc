@@ -53,7 +53,7 @@ jobs:
             docker push ${IMAGE}:latest
     bootstrap:
         name: bootstrap mgmt cluster
-        needs: ["bootstrap_img", "kustomize_img"    ]
+        needs: ["bootstrap_img"]
         runs-on: ubuntu-latest
         env:
             AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
