@@ -10,6 +10,8 @@ spec:
         - name: flux
           args:
             - --sync-garbage-collection
+            - --git-poll-interval=60s
+            - --sync-interval=60s
             - --manifest-generation=true
             - --memcached-hostname=memcached-mgmt.flux-mgmt
             - --memcached-service=
