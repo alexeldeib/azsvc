@@ -76,8 +76,6 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Man
 	}
 
 	diff := spec.Diff()
-	litter.Dump(spec.old)
-	litter.Dump(spec.internal.ManagedClusterProperties)
 	if diff == "" {
 		log.V(1).Info("no update required, found and desired objects equal")
 		return nil
