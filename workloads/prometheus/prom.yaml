@@ -11112,7 +11112,7 @@ apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: prom-grafana
-  namespace: prometheus
+  namespace: default
   labels:
     app: grafana
     chart: grafana-4.2.2
@@ -11165,7 +11165,7 @@ apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: prom-grafana-test
-  namespace: prometheus
+  namespace: default
   labels:
     app: grafana
     chart: grafana-4.2.2
@@ -11232,7 +11232,7 @@ apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: prom-prometheus-node-exporter
-  namespace: prometheus
+  namespace: default
   labels:     
     app: prometheus-node-exporter
     heritage: Helm
@@ -11287,7 +11287,7 @@ apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: prom-prometheus-operator-alertmanager
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-alertmanager
     
@@ -11338,7 +11338,7 @@ apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: prom-prometheus-operator-operator
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-operator
     
@@ -11389,7 +11389,7 @@ apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: prom-prometheus-operator-prometheus
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-prometheus
     
@@ -11440,7 +11440,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: prom-grafana
-  namespace: prometheus
+  namespace: default
   labels:
     app: grafana
     chart: grafana-4.2.2
@@ -11457,7 +11457,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: alertmanager-prom-prometheus-operator-alertmanager
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-alertmanager
     
@@ -11477,7 +11477,7 @@ metadata:
     release: prom
     heritage: Helm
   name: prom-grafana-config-dashboards
-  namespace: prometheus
+  namespace: default
 data:
   provider.yaml: |-
     apiVersion: 1
@@ -11495,7 +11495,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prom-grafana
-  namespace: prometheus
+  namespace: default
   labels:
     app: grafana
     chart: grafana-4.2.2
@@ -11520,7 +11520,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prom-grafana-test
-  namespace: prometheus
+  namespace: default
   labels:
     app: prom-grafana
     chart: "grafana-4.2.2"
@@ -11540,7 +11540,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prom-prometheus-operator-grafana-datasource
-  namespace: prometheus
+  namespace: default
   labels:
     grafana_datasource: "1"
     app: prometheus-operator-grafana
@@ -45311,7 +45311,7 @@ metadata:
     heritage: Helm
     release: prom
   name: prom-grafana
-  namespace: prometheus
+  namespace: default
 ---
 # Source: prometheus-operator/charts/grafana/templates/tests/test-serviceaccount.yaml
 apiVersion: v1
@@ -45323,7 +45323,7 @@ metadata:
     heritage: Helm
     release: prom
   name: prom-grafana-test
-  namespace: prometheus
+  namespace: default
 ---
 # Source: prometheus-operator/charts/kube-state-metrics/templates/serviceaccount.yaml
 apiVersion: v1
@@ -45343,7 +45343,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: prom-prometheus-node-exporter
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-node-exporter
     chart: prometheus-node-exporter-1.8.1
@@ -45357,7 +45357,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: prom-prometheus-operator-alertmanager
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-alertmanager
     
@@ -45372,7 +45372,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: prom-prometheus-operator-operator
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-operator
     
@@ -45387,7 +45387,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: prom-prometheus-operator-prometheus
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-prometheus
     
@@ -45758,7 +45758,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: prom-grafana
-    namespace: prometheus
+    namespace: default
 roleRef:
   kind: ClusterRole
   name: prom-grafana-clusterrole
@@ -45781,7 +45781,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: prom-kube-state-metrics
-  namespace: prometheus
+  namespace: default
 ---
 # Source: prometheus-operator/charts/kube-state-metrics/templates/psp-clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -45800,7 +45800,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: prom-kube-state-metrics
-    namespace: prometheus
+    namespace: default
 ---
 # Source: prometheus-operator/charts/prometheus-node-exporter/templates/psp-clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -45820,7 +45820,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: prom-prometheus-node-exporter
-    namespace: prometheus
+    namespace: default
 ---
 # Source: prometheus-operator/templates/alertmanager/psp-clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -45840,7 +45840,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: prom-prometheus-operator-alertmanager
-    namespace: prometheus
+    namespace: default
 ---
 # Source: prometheus-operator/templates/prometheus-operator/clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -45860,7 +45860,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: prom-prometheus-operator-operator
-  namespace: prometheus
+  namespace: default
 ---
 # Source: prometheus-operator/templates/prometheus-operator/psp-clusterrolebinding.yaml
 kind: ClusterRoleBinding
@@ -45880,7 +45880,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: prom-prometheus-operator-operator
-    namespace: prometheus
+    namespace: default
 ---
 # Source: prometheus-operator/templates/prometheus/clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -45900,7 +45900,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: prom-prometheus-operator-prometheus
-    namespace: prometheus
+    namespace: default
 ---
 # Source: prometheus-operator/templates/prometheus/psp-clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -45920,14 +45920,14 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: prom-prometheus-operator-prometheus
-    namespace: prometheus
+    namespace: default
 ---
 # Source: prometheus-operator/charts/grafana/templates/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
   name: prom-grafana
-  namespace: prometheus
+  namespace: default
   labels:
     app: grafana
     chart: grafana-4.2.2
@@ -45944,7 +45944,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: prom-grafana-test
-  namespace: prometheus
+  namespace: default
   labels:
     app: grafana
     chart: grafana-4.2.2
@@ -45961,7 +45961,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
   name: prom-grafana
-  namespace: prometheus
+  namespace: default
   labels:
     app: grafana
     chart: grafana-4.2.2
@@ -45974,14 +45974,14 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: prom-grafana
-  namespace: prometheus
+  namespace: default
 ---
 # Source: prometheus-operator/charts/grafana/templates/tests/test-rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: prom-grafana-test
-  namespace: prometheus
+  namespace: default
   labels:
     app: grafana
     chart: grafana-4.2.2
@@ -45994,14 +45994,14 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: prom-grafana-test
-  namespace: prometheus
+  namespace: default
 ---
 # Source: prometheus-operator/charts/grafana/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: prom-grafana
-  namespace: prometheus
+  namespace: default
   labels:
     app: grafana
     chart: grafana-4.2.2
@@ -46047,7 +46047,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prom-prometheus-node-exporter
-  namespace: prometheus
+  namespace: default
   annotations:
     prometheus.io/scrape: "true"
   labels:     
@@ -46072,7 +46072,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prom-prometheus-operator-alertmanager
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-alertmanager
     
@@ -46214,7 +46214,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prom-prometheus-operator-operator
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-operator
     
@@ -46239,7 +46239,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prom-prometheus-operator-prometheus
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-prometheus
     self-monitor: "true"
@@ -46262,7 +46262,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: prom-prometheus-node-exporter
-  namespace: prometheus
+  namespace: default
   labels:     
     app: prometheus-node-exporter
     heritage: Helm
@@ -46340,7 +46340,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prom-grafana
-  namespace: prometheus
+  namespace: default
   labels:
     app: grafana
     chart: grafana-4.2.2
@@ -46360,10 +46360,10 @@ spec:
         app: grafana
         release: prom
       annotations:
-        checksum/config: 222a78cd4d4d35e8f90caba05fd8a11dd3e19eb4eba52966f708250a8b36dc13
+        checksum/config: 2e6395e74e0383d15cf4d593d7eee228477ff18a02b0060417254482ea1a87a6
         checksum/dashboards-json-config: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-        checksum/sc-dashboard-provider-config: bed45f9889662895b769841e09ab02d31bf32dac734b024a6c3fa00b79f39832
-        checksum/secret: 961a777345eab77677bbe8ea533578462693e55578270013fbaf76bee0ef4119
+        checksum/sc-dashboard-provider-config: c016d81d42cb716b7ffb56158e45dba9469c7ad6420ceb8c534f9d6f81808a68
+        checksum/secret: fbac188d0d57f9dea48e2988fa49a40f5158c9c0d28b9d399b7ea733bd06172c
     spec:
       
       serviceAccountName: prom-grafana
@@ -46588,7 +46588,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prom-prometheus-operator-operator
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-operator
     
@@ -46822,7 +46822,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: Alertmanager
 metadata:
   name: prom-prometheus-operator-alertmanager
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-alertmanager
     
@@ -46835,7 +46835,7 @@ spec:
   replicas: 1
   listenLocal: false
   serviceAccountName: prom-prometheus-operator-alertmanager
-  externalUrl: http://prom-prometheus-operator-alertmanager.prometheus:9093
+  externalUrl: http://prom-prometheus-operator-alertmanager.default:9093
   paused: false
   logFormat: "logfmt"
   logLevel:  "info"
@@ -46872,7 +46872,7 @@ webhooks:
           - UPDATE
     clientConfig:
       service:
-        namespace: prometheus
+        namespace: default
         name: prom-prometheus-operator-operator
         path: /admission-prometheusrules/mutate
 ---
@@ -46881,7 +46881,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
 metadata:
   name: prom-prometheus-operator-prometheus
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-prometheus
     
@@ -46891,13 +46891,13 @@ metadata:
 spec:
   alerting:
     alertmanagers:
-      - namespace: prometheus
+      - namespace: default
         name: prom-prometheus-operator-alertmanager
         port: web
         pathPrefix: "/"
   baseImage: quay.io/prometheus/prometheus
   version: v2.13.1
-  externalUrl: http://prom-prometheus-operator-prometheus.prometheus:9090
+  externalUrl: http://prom-prometheus-operator-prometheus.default:9090
   paused: false
   replicas: 1
   logLevel:  info
@@ -46937,7 +46937,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-alertmanager.rules
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -46951,14 +46951,14 @@ spec:
     - alert: AlertmanagerConfigInconsistent
       annotations:
         message: The configuration of the instances of the Alertmanager cluster `{{$labels.service}}` are out of sync.
-      expr: count_values("config_hash", alertmanager_config_hash{job="prom-prometheus-operator-alertmanager",namespace="prometheus"}) BY (service) / ON(service) GROUP_LEFT() label_replace(max(prometheus_operator_spec_replicas{job="prom-prometheus-operator-operator",namespace="prometheus",controller="alertmanager"}) by (name, job, namespace, controller), "service", "$1", "name", "(.*)") != 1
+      expr: count_values("config_hash", alertmanager_config_hash{job="prom-prometheus-operator-alertmanager",namespace="default"}) BY (service) / ON(service) GROUP_LEFT() label_replace(max(prometheus_operator_spec_replicas{job="prom-prometheus-operator-operator",namespace="default",controller="alertmanager"}) by (name, job, namespace, controller), "service", "$1", "name", "(.*)") != 1
       for: 5m
       labels:
         severity: critical
     - alert: AlertmanagerFailedReload
       annotations:
         message: Reloading Alertmanager's configuration has failed for {{ $labels.namespace }}/{{ $labels.pod}}.
-      expr: alertmanager_config_last_reload_successful{job="prom-prometheus-operator-alertmanager",namespace="prometheus"} == 0
+      expr: alertmanager_config_last_reload_successful{job="prom-prometheus-operator-alertmanager",namespace="default"} == 0
       for: 10m
       labels:
         severity: warning
@@ -46966,9 +46966,9 @@ spec:
       annotations:
         message: Alertmanager has not found all other members of the cluster.
       expr: |-
-        alertmanager_cluster_members{job="prom-prometheus-operator-alertmanager",namespace="prometheus"}
+        alertmanager_cluster_members{job="prom-prometheus-operator-alertmanager",namespace="default"}
           != on (service) GROUP_LEFT()
-        count by (service) (alertmanager_cluster_members{job="prom-prometheus-operator-alertmanager",namespace="prometheus"})
+        count by (service) (alertmanager_cluster_members{job="prom-prometheus-operator-alertmanager",namespace="default"})
       for: 5m
       labels:
         severity: critical
@@ -46981,7 +46981,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-etcd
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -47114,7 +47114,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-general.rules
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -47157,7 +47157,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-k8s.rules
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -47257,7 +47257,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kube-apiserver-error
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -47425,7 +47425,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kube-apiserver.rules
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -47462,7 +47462,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kube-prometheus-node-recording.rules
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -47496,7 +47496,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kube-scheduler.rules
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -47552,7 +47552,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kubernetes-absent
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -47567,7 +47567,7 @@ spec:
       annotations:
         message: Alertmanager has disappeared from Prometheus target discovery.
         runbook_url: alert-name-alertmanagerdown
-      expr: absent(up{job="prom-prometheus-operator-alertmanager",namespace="prometheus"} == 1)
+      expr: absent(up{job="prom-prometheus-operator-alertmanager",namespace="default"} == 1)
       for: 15m
       labels:
         severity: critical
@@ -47623,7 +47623,7 @@ spec:
       annotations:
         message: Prometheus has disappeared from Prometheus target discovery.
         runbook_url: alert-name-prometheusdown
-      expr: absent(up{job="prom-prometheus-operator-prometheus",namespace="prometheus"} == 1)
+      expr: absent(up{job="prom-prometheus-operator-prometheus",namespace="default"} == 1)
       for: 15m
       labels:
         severity: critical
@@ -47631,7 +47631,7 @@ spec:
       annotations:
         message: PrometheusOperator has disappeared from Prometheus target discovery.
         runbook_url: alert-name-prometheusoperatordown
-      expr: absent(up{job="prom-prometheus-operator-operator",namespace="prometheus"} == 1)
+      expr: absent(up{job="prom-prometheus-operator-operator",namespace="default"} == 1)
       for: 15m
       labels:
         severity: critical
@@ -47644,7 +47644,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kubernetes-apps
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -47829,7 +47829,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kubernetes-resources
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -47925,7 +47925,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kubernetes-storage
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -47980,7 +47980,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kubernetes-system-apiserver
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -48097,7 +48097,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kubernetes-system-controller-manager
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -48125,7 +48125,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kubernetes-system-kubelet
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -48176,7 +48176,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kubernetes-system-scheduler
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -48204,7 +48204,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-kubernetes-system
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -48244,7 +48244,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-node-exporter.rules
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -48316,7 +48316,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-node-exporter
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -48474,7 +48474,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-node-network
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -48501,7 +48501,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-node-time
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -48528,7 +48528,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-node.rules
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -48570,7 +48570,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-prometheus-operator
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -48584,14 +48584,14 @@ spec:
     - alert: PrometheusOperatorReconcileErrors
       annotations:
         message: Errors while reconciling {{ $labels.controller }} in {{ $labels.namespace }} Namespace.
-      expr: rate(prometheus_operator_reconcile_errors_total{job="prom-prometheus-operator-operator",namespace="prometheus"}[5m]) > 0.1
+      expr: rate(prometheus_operator_reconcile_errors_total{job="prom-prometheus-operator-operator",namespace="default"}[5m]) > 0.1
       for: 10m
       labels:
         severity: warning
     - alert: PrometheusOperatorNodeLookupErrors
       annotations:
         message: Errors while reconciling Prometheus in {{ $labels.namespace }} Namespace.
-      expr: rate(prometheus_operator_node_address_lookup_errors_total{job="prom-prometheus-operator-operator",namespace="prometheus"}[5m]) > 0.1
+      expr: rate(prometheus_operator_node_address_lookup_errors_total{job="prom-prometheus-operator-operator",namespace="default"}[5m]) > 0.1
       for: 10m
       labels:
         severity: warning
@@ -48604,7 +48604,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: prom-prometheus-operator-prometheus
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator
     
@@ -48622,7 +48622,7 @@ spec:
       expr: |-
         # Without max_over_time, failed scrapes could create false negatives, see
         # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
-        max_over_time(prometheus_config_last_reload_successful{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m]) == 0
+        max_over_time(prometheus_config_last_reload_successful{job="prom-prometheus-operator-prometheus",namespace="default"}[5m]) == 0
       for: 10m
       labels:
         severity: critical
@@ -48634,9 +48634,9 @@ spec:
         # Without min_over_time, failed scrapes could create false negatives, see
         # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
         (
-          predict_linear(prometheus_notifications_queue_length{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m], 60 * 30)
+          predict_linear(prometheus_notifications_queue_length{job="prom-prometheus-operator-prometheus",namespace="default"}[5m], 60 * 30)
         >
-          min_over_time(prometheus_notifications_queue_capacity{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m])
+          min_over_time(prometheus_notifications_queue_capacity{job="prom-prometheus-operator-prometheus",namespace="default"}[5m])
         )
       for: 15m
       labels:
@@ -48647,9 +48647,9 @@ spec:
         summary: Prometheus has encountered more than 1% errors sending alerts to a specific Alertmanager.
       expr: |-
         (
-          rate(prometheus_notifications_errors_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m])
+          rate(prometheus_notifications_errors_total{job="prom-prometheus-operator-prometheus",namespace="default"}[5m])
         /
-          rate(prometheus_notifications_sent_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m])
+          rate(prometheus_notifications_sent_total{job="prom-prometheus-operator-prometheus",namespace="default"}[5m])
         )
         * 100
         > 1
@@ -48662,9 +48662,9 @@ spec:
         summary: Prometheus encounters more than 3% errors sending alerts to any Alertmanager.
       expr: |-
         min without(alertmanager) (
-          rate(prometheus_notifications_errors_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m])
+          rate(prometheus_notifications_errors_total{job="prom-prometheus-operator-prometheus",namespace="default"}[5m])
         /
-          rate(prometheus_notifications_sent_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m])
+          rate(prometheus_notifications_sent_total{job="prom-prometheus-operator-prometheus",namespace="default"}[5m])
         )
         * 100
         > 3
@@ -48678,7 +48678,7 @@ spec:
       expr: |-
         # Without max_over_time, failed scrapes could create false negatives, see
         # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
-        max_over_time(prometheus_notifications_alertmanagers_discovered{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m]) < 1
+        max_over_time(prometheus_notifications_alertmanagers_discovered{job="prom-prometheus-operator-prometheus",namespace="default"}[5m]) < 1
       for: 10m
       labels:
         severity: warning
@@ -48686,7 +48686,7 @@ spec:
       annotations:
         description: Prometheus {{$labels.namespace}}/{{$labels.pod}} has detected {{$value | humanize}} reload failures over the last 3h.
         summary: Prometheus has issues reloading blocks from disk.
-      expr: increase(prometheus_tsdb_reloads_failures_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[3h]) > 0
+      expr: increase(prometheus_tsdb_reloads_failures_total{job="prom-prometheus-operator-prometheus",namespace="default"}[3h]) > 0
       for: 4h
       labels:
         severity: warning
@@ -48694,7 +48694,7 @@ spec:
       annotations:
         description: Prometheus {{$labels.namespace}}/{{$labels.pod}} has detected {{$value | humanize}} compaction failures over the last 3h.
         summary: Prometheus has issues compacting blocks.
-      expr: increase(prometheus_tsdb_compactions_failed_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[3h]) > 0
+      expr: increase(prometheus_tsdb_compactions_failed_total{job="prom-prometheus-operator-prometheus",namespace="default"}[3h]) > 0
       for: 4h
       labels:
         severity: warning
@@ -48702,7 +48702,7 @@ spec:
       annotations:
         description: Prometheus {{$labels.namespace}}/{{$labels.pod}} is not ingesting samples.
         summary: Prometheus is not ingesting samples.
-      expr: rate(prometheus_tsdb_head_samples_appended_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m]) <= 0
+      expr: rate(prometheus_tsdb_head_samples_appended_total{job="prom-prometheus-operator-prometheus",namespace="default"}[5m]) <= 0
       for: 10m
       labels:
         severity: warning
@@ -48710,7 +48710,7 @@ spec:
       annotations:
         description: Prometheus {{$labels.namespace}}/{{$labels.pod}} is dropping {{ printf "%.4g" $value  }} samples/s with different values but duplicated timestamp.
         summary: Prometheus is dropping samples with duplicate timestamps.
-      expr: rate(prometheus_target_scrapes_sample_duplicate_timestamp_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m]) > 0
+      expr: rate(prometheus_target_scrapes_sample_duplicate_timestamp_total{job="prom-prometheus-operator-prometheus",namespace="default"}[5m]) > 0
       for: 10m
       labels:
         severity: warning
@@ -48718,7 +48718,7 @@ spec:
       annotations:
         description: Prometheus {{$labels.namespace}}/{{$labels.pod}} is dropping {{ printf "%.4g" $value  }} samples/s with timestamps arriving out of order.
         summary: Prometheus drops samples with out-of-order timestamps.
-      expr: rate(prometheus_target_scrapes_sample_out_of_order_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m]) > 0
+      expr: rate(prometheus_target_scrapes_sample_out_of_order_total{job="prom-prometheus-operator-prometheus",namespace="default"}[5m]) > 0
       for: 10m
       labels:
         severity: warning
@@ -48728,12 +48728,12 @@ spec:
         summary: Prometheus fails to send samples to remote storage.
       expr: |-
         (
-          rate(prometheus_remote_storage_failed_samples_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m])
+          rate(prometheus_remote_storage_failed_samples_total{job="prom-prometheus-operator-prometheus",namespace="default"}[5m])
         /
           (
-            rate(prometheus_remote_storage_failed_samples_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m])
+            rate(prometheus_remote_storage_failed_samples_total{job="prom-prometheus-operator-prometheus",namespace="default"}[5m])
           +
-            rate(prometheus_remote_storage_succeeded_samples_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m])
+            rate(prometheus_remote_storage_succeeded_samples_total{job="prom-prometheus-operator-prometheus",namespace="default"}[5m])
           )
         )
         * 100
@@ -48749,9 +48749,9 @@ spec:
         # Without max_over_time, failed scrapes could create false negatives, see
         # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
         (
-          max_over_time(prometheus_remote_storage_highest_timestamp_in_seconds{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m])
+          max_over_time(prometheus_remote_storage_highest_timestamp_in_seconds{job="prom-prometheus-operator-prometheus",namespace="default"}[5m])
         - on(job, instance) group_right
-          max_over_time(prometheus_remote_storage_queue_highest_sent_timestamp_seconds{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m])
+          max_over_time(prometheus_remote_storage_queue_highest_sent_timestamp_seconds{job="prom-prometheus-operator-prometheus",namespace="default"}[5m])
         )
         > 120
       for: 15m
@@ -48765,9 +48765,9 @@ spec:
         # Without max_over_time, failed scrapes could create false negatives, see
         # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
         (
-          max_over_time(prometheus_remote_storage_shards_desired{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m])
+          max_over_time(prometheus_remote_storage_shards_desired{job="prom-prometheus-operator-prometheus",namespace="default"}[5m])
         >
-          max_over_time(prometheus_remote_storage_shards_max{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m])
+          max_over_time(prometheus_remote_storage_shards_max{job="prom-prometheus-operator-prometheus",namespace="default"}[5m])
         )
       for: 15m
       labels:
@@ -48776,7 +48776,7 @@ spec:
       annotations:
         description: Prometheus {{$labels.namespace}}/{{$labels.pod}} has failed to evaluate {{ printf "%.0f" $value }} rules in the last 5m.
         summary: Prometheus is failing rule evaluations.
-      expr: increase(prometheus_rule_evaluation_failures_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m]) > 0
+      expr: increase(prometheus_rule_evaluation_failures_total{job="prom-prometheus-operator-prometheus",namespace="default"}[5m]) > 0
       for: 15m
       labels:
         severity: critical
@@ -48784,7 +48784,7 @@ spec:
       annotations:
         description: Prometheus {{$labels.namespace}}/{{$labels.pod}} has missed {{ printf "%.0f" $value }} rule group evaluations in the last 5m.
         summary: Prometheus is missing rule evaluations due to slow rule group evaluation.
-      expr: increase(prometheus_rule_group_iterations_missed_total{job="prom-prometheus-operator-prometheus",namespace="prometheus"}[5m]) > 0
+      expr: increase(prometheus_rule_group_iterations_missed_total{job="prom-prometheus-operator-prometheus",namespace="default"}[5m]) > 0
       for: 15m
       labels:
         severity: warning
@@ -48794,7 +48794,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-alertmanager
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-alertmanager
     
@@ -48808,7 +48808,7 @@ spec:
       release: "prom"
   namespaceSelector:
     matchNames:
-      - "prometheus"
+      - "default"
   endpoints:
   - port: web
     path: "/metrics"
@@ -48818,7 +48818,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-coredns
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-coredns
     
@@ -48843,7 +48843,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-apiserver
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-apiserver
     
@@ -48873,7 +48873,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-kube-controller-manager
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-kube-controller-manager
     
@@ -48898,7 +48898,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-kube-etcd
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-kube-etcd
     
@@ -48923,7 +48923,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-kube-proxy
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-kube-proxy
     
@@ -48948,7 +48948,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-kube-scheduler
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-kube-scheduler
     
@@ -48973,7 +48973,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-kube-state-metrics
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-kube-state-metrics
     
@@ -48995,7 +48995,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-kubelet
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-kubelet
     
@@ -49032,7 +49032,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-node-exporter
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-node-exporter
     
@@ -49053,7 +49053,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-grafana
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-grafana
     
@@ -49067,7 +49067,7 @@ spec:
       release: "prom"
   namespaceSelector:
     matchNames:
-      - "prometheus"
+      - "default"
   endpoints:
   - port: service
     path: "/metrics"
@@ -49077,7 +49077,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-operator
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-operator
     
@@ -49094,14 +49094,14 @@ spec:
       release: "prom"
   namespaceSelector:
     matchNames:
-      - "prometheus"
+      - "default"
 ---
 # Source: prometheus-operator/templates/prometheus/servicemonitor.yaml
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: prom-prometheus-operator-prometheus
-  namespace: prometheus
+  namespace: default
   labels:
     app: prometheus-operator-prometheus
     
@@ -49116,7 +49116,7 @@ spec:
       self-monitor: "true"
   namespaceSelector:
     matchNames:
-      - "prometheus"
+      - "default"
   endpoints:
   - port: web
     path: "/metrics"
@@ -49146,58 +49146,16 @@ webhooks:
           - UPDATE
     clientConfig:
       service:
-        namespace: prometheus
+        namespace: default
         name: prom-prometheus-operator-operator
         path: /admission-prometheusrules/validate
 ---
-# Source: prometheus-operator/templates/prometheus-operator/admission-webhooks/job-patch/job-patchWebhook.yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name:  prom-prometheus-operator-admission-patch
-  namespace: prometheus
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-  labels:
-    app: prometheus-operator-admission-patch    
-    chart: prometheus-operator-8.5.7
-    release: "prom"
-    heritage: "Helm"
-spec:
-  template:
-    metadata:
-      name:  prom-prometheus-operator-admission-patch
-      labels:
-        app: prometheus-operator-admission-patch        
-        chart: prometheus-operator-8.5.7
-        release: "prom"
-        heritage: "Helm"
-    spec:
-      containers:
-        - name: patch
-          image: jettech/kube-webhook-certgen:v1.0.0
-          imagePullPolicy: 
-          args:
-            - patch
-            - --webhook-name=prom-prometheus-operator-admission
-            - --namespace=prometheus
-            - --secret-name=prom-prometheus-operator-admission
-            - --patch-failure-policy=Fail
-          resources:
-            {}
-      restartPolicy: OnFailure
-      serviceAccountName: prom-prometheus-operator-admission
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 2000
----
-# Source: prometheus-operator/templates/prometheus-operator/admission-webhooks/job-patch/rolebinding.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+# Source: prometheus-operator/templates/prometheus-operator/admission-webhooks/job-patch/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
 metadata:
   name:  prom-prometheus-operator-admission
-  namespace: prometheus
+  namespace: default
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
@@ -49206,78 +49164,6 @@ metadata:
     chart: prometheus-operator-8.5.7
     release: "prom"
     heritage: "Helm"
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: prom-prometheus-operator-admission
-subjects:
-  - kind: ServiceAccount
-    name: prom-prometheus-operator-admission
-    namespace: prometheus
----
-# Source: prometheus-operator/templates/prometheus-operator/admission-webhooks/job-patch/job-createSecret.yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name:  prom-prometheus-operator-admission-create
-  namespace: prometheus
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-  labels:
-    app: prometheus-operator-admission-create    
-    chart: prometheus-operator-8.5.7
-    release: "prom"
-    heritage: "Helm"
-spec:
-  template:
-    metadata:
-      name:  prom-prometheus-operator-admission-create
-      labels:
-        app: prometheus-operator-admission-create        
-        chart: prometheus-operator-8.5.7
-        release: "prom"
-        heritage: "Helm"
-    spec:
-      containers:
-        - name: create
-          image: jettech/kube-webhook-certgen:v1.0.0
-          imagePullPolicy: 
-          args:
-            - create
-            - --host=prom-prometheus-operator-operator,prom-prometheus-operator-operator.prometheus.svc
-            - --namespace=prometheus
-            - --secret-name=prom-prometheus-operator-admission
-          resources:
-            {}
-      restartPolicy: OnFailure
-      serviceAccountName: prom-prometheus-operator-admission
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 2000
----
-# Source: prometheus-operator/templates/prometheus-operator/admission-webhooks/job-patch/role.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name:  prom-prometheus-operator-admission
-  namespace: prometheus
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-  labels:
-    app: prometheus-operator-admission    
-    chart: prometheus-operator-8.5.7
-    release: "prom"
-    heritage: "Helm"
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - secrets
-    verbs:
-      - get
-      - create
 ---
 # Source: prometheus-operator/templates/prometheus-operator/admission-webhooks/job-patch/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -49307,6 +49193,48 @@ rules:
     resourceNames:
     - prom-prometheus-operator-admission
 ---
+# Source: prometheus-operator/templates/prometheus-operator/admission-webhooks/job-patch/job-patchWebhook.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name:  prom-prometheus-operator-admission-patch
+  namespace: default
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    app: prometheus-operator-admission-patch    
+    chart: prometheus-operator-8.5.7
+    release: "prom"
+    heritage: "Helm"
+spec:
+  template:
+    metadata:
+      name:  prom-prometheus-operator-admission-patch
+      labels:
+        app: prometheus-operator-admission-patch        
+        chart: prometheus-operator-8.5.7
+        release: "prom"
+        heritage: "Helm"
+    spec:
+      containers:
+        - name: patch
+          image: jettech/kube-webhook-certgen:v1.0.0
+          imagePullPolicy: 
+          args:
+            - patch
+            - --webhook-name=prom-prometheus-operator-admission
+            - --namespace=default
+            - --secret-name=prom-prometheus-operator-admission
+            - --patch-failure-policy=Fail
+          resources:
+            {}
+      restartPolicy: OnFailure
+      serviceAccountName: prom-prometheus-operator-admission
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 2000
+---
 # Source: prometheus-operator/charts/grafana/templates/tests/test.yaml
 apiVersion: v1
 kind: Pod
@@ -49319,7 +49247,7 @@ metadata:
     release: "prom"
   annotations:
     "helm.sh/hook": test-success
-  namespace: prometheus
+  namespace: default
 spec:
   serviceAccountName: prom-grafana-test
   initContainers:
@@ -49353,12 +49281,35 @@ spec:
     emptyDir: {}
   restartPolicy: Never
 ---
+# Source: prometheus-operator/templates/prometheus-operator/admission-webhooks/job-patch/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name:  prom-prometheus-operator-admission
+  namespace: default
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    app: prometheus-operator-admission    
+    chart: prometheus-operator-8.5.7
+    release: "prom"
+    heritage: "Helm"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prom-prometheus-operator-admission
+subjects:
+  - kind: ServiceAccount
+    name: prom-prometheus-operator-admission
+    namespace: default
+---
 # Source: prometheus-operator/templates/prometheus-operator/admission-webhooks/job-patch/psp.yaml
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: prom-prometheus-operator-admission
-  namespace: prometheus
+  namespace: default
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
@@ -49412,7 +49363,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name:  prom-prometheus-operator-admission
-  namespace: prometheus
+  namespace: default
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
@@ -49428,14 +49379,14 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: prom-prometheus-operator-admission
-    namespace: prometheus
+    namespace: default
 ---
-# Source: prometheus-operator/templates/prometheus-operator/admission-webhooks/job-patch/serviceaccount.yaml
-apiVersion: v1
-kind: ServiceAccount
+# Source: prometheus-operator/templates/prometheus-operator/admission-webhooks/job-patch/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
 metadata:
   name:  prom-prometheus-operator-admission
-  namespace: prometheus
+  namespace: default
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
@@ -49444,3 +49395,52 @@ metadata:
     chart: prometheus-operator-8.5.7
     release: "prom"
     heritage: "Helm"
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - create
+---
+# Source: prometheus-operator/templates/prometheus-operator/admission-webhooks/job-patch/job-createSecret.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name:  prom-prometheus-operator-admission-create
+  namespace: default
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    app: prometheus-operator-admission-create    
+    chart: prometheus-operator-8.5.7
+    release: "prom"
+    heritage: "Helm"
+spec:
+  template:
+    metadata:
+      name:  prom-prometheus-operator-admission-create
+      labels:
+        app: prometheus-operator-admission-create        
+        chart: prometheus-operator-8.5.7
+        release: "prom"
+        heritage: "Helm"
+    spec:
+      containers:
+        - name: create
+          image: jettech/kube-webhook-certgen:v1.0.0
+          imagePullPolicy: 
+          args:
+            - create
+            - --host=prom-prometheus-operator-operator,prom-prometheus-operator-operator.default.svc
+            - --namespace=default
+            - --secret-name=prom-prometheus-operator-admission
+          resources:
+            {}
+      restartPolicy: OnFailure
+      serviceAccountName: prom-prometheus-operator-admission
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 2000
