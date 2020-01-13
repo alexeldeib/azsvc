@@ -98,4 +98,4 @@ jobs:
             ${GITHUB_WORKSPACE}/bin/bootstrap -f ./cmd/bootstrap/config.yaml --app ${AZURE_CLIENT_ID} --tenant ${AZURE_TENANT_ID} --key ${AZURE_CLIENT_SECRET}
             kustomize build ./config/flux | kubectl --kubeconfig ./kubeconfig apply -f -
             kubectl --kubeconfig ./kubeconfig create secret generic -n flux-mgmt flux-git-deploy-mgmt --dry-run=true --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
-            kubectl --kubeconfig ./kubeconfig create secret generic -n flux-clusters flux-git-deploy-cluster --dry-run=true --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
+            kubectl --kubeconfig ./kubeconfig create secret generic -n flux-clusters flux-git-deploy-clusters --dry-run=true --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
