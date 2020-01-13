@@ -22,11 +22,18 @@ spec:
       labels:
         control-plane: controller-manager
     spec:
+      volumes:
+        - name: azure
+          secret:
+            secretName: azure-json
       containers:
       - command:
         - /manager
         args:
         - --enable-leader-election
+        env:
+        - name: AZURE_AUTH_LOCATION
+          value: /etc/secret/azure.json
         image: controller:latest
         name: manager
         resources:
@@ -36,4 +43,8 @@ spec:
           requests:
             cpu: 100m
             memory: 20Mi
+        volumeMounts:
+          - name: azure
+            readOnly: true
+            mountPath: "/etc/secret"
       terminationGracePeriodSeconds: 10

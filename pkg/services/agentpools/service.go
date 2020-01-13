@@ -2,6 +2,7 @@ package agentpools
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Azure/go-autorest/autorest"
@@ -32,17 +33,15 @@ func backoff() wait.Backoff {
 
 type Service struct {
 	authorizer autorest.Authorizer
-	log        logr.Logger
 }
 
-func NewService(authorizer autorest.Authorizer, log logr.Logger) *Service {
+func NewService(authorizer autorest.Authorizer) *Service {
 	return &Service{
 		authorizer,
-		log,
 	}
 }
 
-func (s *Service) Ensure(ctx context.Context, obj *v1alpha1.AgentPool) error {
+func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.AgentPool) error {
 	client, err := newClient(s.authorizer, obj.Spec.SubscriptionID)
 	if err != nil {
 		return err
@@ -61,23 +60,30 @@ func (s *Service) Ensure(ctx context.Context, obj *v1alpha1.AgentPool) error {
 		KubernetesVersion(obj.Spec.Version),
 	)
 
-	s.log.Info("beginning long create/update operation")
+	diff := spec.Diff()
+	if diff == "" {
+		log.V(1).Info("no update required, found and desired objects equal")
+		return nil
+	}
+	fmt.Printf("update required (+new -old):\n%s", diff)
+
+	log.Info("beginning long create/update operation")
 	future, err := client.CreateOrUpdate(ctx, obj.Spec.ResourceGroup, obj.Spec.Cluster, obj.Spec.Name, spec.internal)
 	if err != nil {
 		return err
 	}
 
 	return wait.ExponentialBackoff(backoff(), func() (done bool, err error) {
-		s.log.Info("reconciling with backoff")
+		log.Info("reconciling with backoff")
 		done, err = future.DoneWithContext(ctx, client)
 		if err != nil {
-			s.log.Error(err, "failed reconcile attempt")
+			log.Error(err, "failed reconcile attempt")
 		}
 		return done && err == nil, nil
 	})
 }
 
-func (s *Service) Delete(ctx context.Context, obj *v1alpha1.AgentPool) error {
+func (s *Service) Delete(ctx context.Context, log logr.Logger, obj *v1alpha1.AgentPool) error {
 	client, err := newClient(s.authorizer, obj.Spec.SubscriptionID)
 	if err != nil {
 		return err

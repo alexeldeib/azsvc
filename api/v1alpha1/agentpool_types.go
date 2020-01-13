@@ -15,7 +15,11 @@ type AgentPoolSpec struct {
 	// +kubebuilder:validation:Pattern=`^[-\w\._\(\)]+$`
 	ResourceGroup string `json:"resourceGroup"`
 	// Cluster is the name of the AKS cluster to which this agent pool is attached.
-	Cluster string `json:"cluster"`
+	Cluster           string `json:"cluster"`
+	AgentPoolTemplate `json:"-"`
+}
+
+type AgentPoolTemplate struct {
 	// Name is the name of the node pool.
 	Name string `json:"name"`
 	// SKU is the size of the VMs in the node pool.
@@ -23,7 +27,7 @@ type AgentPoolSpec struct {
 	// Replicas is the number of nodes in this agent pool.
 	Replicas int32 `json:"replicas"`
 	// Version defines the kubernetes version of the agent pool.
-	Version string `json:"version"`
+	Version *string `json:"version,omitempty"`
 	// OSDiskSizeGB is the disk size for every machine in this master/agent pool. If you specify 0, it will apply the default osDisk size according to the vmSize specified.
 	OSDiskSizeGB *int32 `json:"osDiskSizeGB,omitempty"`
 }

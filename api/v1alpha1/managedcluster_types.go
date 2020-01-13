@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -16,13 +17,19 @@ type ManagedClusterSpec struct {
 	Location string `json:"location"`
 	// Name is the name of the managed cluster in Azure.
 	Name string `json:"name"`
+	// CredentialsRef is a reference to the service principal credentials which will be placed on the cluster.
+	CredentialsRef corev1.SecretReference `json:"credentialsRef"`
+	// KubeconfigRef is a reference to the service principal credentials which will be placed on the cluster.
+	KubeconfigRef *corev1.SecretKeySelector `json:"kubeconfigRef,omitempty"`
+	// Kustomizations is an array of kustomize remote targets to apply to the cluster
+	Kustomizations []string `json:"kustomizations,omitempty"`
 	// SSHPublicKey is a string literal containing an ssh public key.
 	SSHPublicKey string `json:"sshPublicKey"`
 	// Version defines the kubernetes version of the cluster.
 	Version string `json:"version"`
 	// AgentPools is the list of additional node pools managed by this cluster.
 	// +kubebuilder:validation:MinItems=1
-	AgentPools []AgentPoolSpec `json:"nodePools"`
+	AgentPools []AgentPoolTemplate `json:"nodePools"`
 	// LoadBalancerSKU for the managed cluster. Possible values include: 'Standard', 'Basic'. Defaults to standard.
 	// +kubebuilder:validation:Enum=Standard;Basic
 	LoadBalancerSKU *string `json:"loadBalancerSku,omitempty"`

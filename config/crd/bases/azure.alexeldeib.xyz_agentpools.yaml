@@ -40,41 +40,18 @@ spec:
               description: Cluster is the name of the AKS cluster to which this agent
                 pool is attached.
               type: string
-            name:
-              description: Name is the name of the node pool.
-              type: string
-            osDiskSizeGB:
-              description: OSDiskSizeGB is the disk size for every machine in this
-                master/agent pool. If you specify 0, it will apply the default osDisk
-                size according to the vmSize specified.
-              format: int32
-              type: integer
-            replicas:
-              description: Replicas is the number of nodes in this agent pool.
-              format: int32
-              type: integer
             resourceGroup:
               description: ResourceGroup is the resource group name for an Azure resource.
               pattern: ^[-\w\._\(\)]+$
-              type: string
-            sku:
-              description: SKU is the size of the VMs in the node pool.
               type: string
             subscriptionId:
               description: SubscriptionID is the subscription id for an Azure resource.
               pattern: ^[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}$
               type: string
-            version:
-              description: Version defines the kubernetes version of the agent pool.
-              type: string
           required:
           - cluster
-          - name
-          - replicas
           - resourceGroup
-          - sku
           - subscriptionId
-          - version
           type: object
         status:
           description: AgentPoolStatus defines the observed state of AgentPool

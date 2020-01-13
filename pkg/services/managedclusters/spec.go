@@ -2,6 +2,8 @@ package managedclusters
 
 import (
 	"github.com/Azure/azure-sdk-for-go/services/containerservice/mgmt/2019-11-01/containerservice"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 var defaultUser string = "azureuser"
@@ -13,6 +15,7 @@ type Spec struct {
 	subscriptionID string
 	group          string
 	internal       containerservice.ManagedCluster
+	old            containerservice.ManagedCluster
 	future         []byte
 }
 
@@ -38,9 +41,19 @@ func defaultSpec() *Spec {
 }
 
 func (s *Spec) Set(options ...specOption) {
+	s.old = s.internal
 	for _, option := range options {
 		s = option(s)
 	}
+}
+
+func (s *Spec) Diff() string {
+	ignored := []cmp.Option{
+		cmpopts.IgnoreFields(containerservice.ManagedCluster{}, "Response"),
+		cmpopts.IgnoreFields(containerservice.ManagedCluster{}, "ManagedClusterProperties.ServicePrincipalProfile"),
+		cmpopts.IgnoreFields(containerservice.ManagedCluster{}, "ManagedClusterProperties.AgentPoolProfiles"),
+	}
+	return cmp.Diff(s.internal, s.old, ignored...)
 }
 
 func (s *Spec) Exists() bool {

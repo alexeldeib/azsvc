@@ -2,7 +2,7 @@ package managedclusters
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/Azure/go-autorest/autorest"
@@ -34,18 +34,18 @@ func backoff() wait.Backoff {
 
 type Service struct {
 	authorizer autorest.Authorizer
-	log        logr.Logger
+	newClient  func(autorest.Authorizer, string) (*client, error)
 }
 
-func NewService(authorizer autorest.Authorizer, logger logr.Logger) *Service {
+func NewService(authorizer autorest.Authorizer) *Service {
 	return &Service{
 		authorizer,
-		logger,
+		newClient,
 	}
 }
 
 func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.ManagedCluster, creds *corev1.Secret) error {
-	client, err := newClient(s.authorizer, obj.Spec.SubscriptionID)
+	client, err := s.newClient(s.authorizer, obj.Spec.SubscriptionID)
 	if err != nil {
 		return err
 	}
@@ -74,30 +74,34 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Man
 		}
 	}
 
-	log.Info("beginning long create/update operation")
-	future, err := client.CreateOrUpdate(ctx, obj.Spec.ResourceGroup, obj.Spec.Name, spec.internal)
-	if err != nil {
-		return err
+	diff := spec.Diff()
+	if diff == "" {
+		log.V(1).Info("no update required, found and desired objects equal")
+		return nil
 	}
+	fmt.Printf("update required (+new -old):\n%s", diff)
 
-	return wait.ExponentialBackoff(backoff(), func() (done bool, err error) {
-		log.Info("reconciling with backoff")
-		done, err = future.DoneWithContext(ctx, client)
-		if err != nil {
-			log.Error(err, "failed reconcile attempt")
-		}
-		return done && err == nil, nil
-	})
+	log.V(1).Info("beginning long create/update operation")
+	_, err = client.createOrUpdate(ctx, log, obj.Spec.ResourceGroup, obj.Spec.Name, spec.internal)
+	return err
+	// return wait.ExponentialBackoff(backoff(), func() (done bool, err error) {
+	// 	log.Info("reconciling with backoff")
+	// 	done, err = future.DoneWithContext(ctx, client)
+	// 	if err != nil {
+	// 		log.Error(err, "failed reconcile attempt")
+	// 	}
+	// 	return done && err == nil, nil
+	// })
 }
 
-func (s *Service) Delete(ctx context.Context, obj *v1alpha1.ManagedCluster) error {
-	client, err := newClient(s.authorizer, obj.Spec.SubscriptionID)
+func (s *Service) Delete(ctx context.Context, log logr.Logger, obj *v1alpha1.ManagedCluster) error {
+	client, err := s.newClient(s.authorizer, obj.Spec.SubscriptionID)
 	if err != nil {
 		return err
 	}
 
-	s.log.Info("beginning long delete operation")
-	future, err := client.Delete(ctx, obj.Spec.ResourceGroup, obj.Spec.Name)
+	log.V(1).Info("beginning long delete operation")
+	err = client.delete(ctx, log, obj.Spec.ResourceGroup, obj.Spec.Name)
 	if err != nil {
 		if azerr.IsNotFound(err) {
 			return nil
@@ -105,18 +109,20 @@ func (s *Service) Delete(ctx context.Context, obj *v1alpha1.ManagedCluster) erro
 		return err
 	}
 
-	return wait.ExponentialBackoff(backoff(), func() (done bool, err error) {
-		s.log.Info("deleting with backoff")
-		done, err = future.DoneWithContext(ctx, client)
-		if err != nil {
-			s.log.Error(err, "failed deletion attempt")
-		}
-		return done && err == nil, nil
-	})
+	return nil
+
+	// return wait.ExponentialBackoff(backoff(), func() (done bool, err error) {
+	// 	log.Info("deleting with backoff")
+	// 	done, err = future.DoneWithContext(ctx, client)
+	// 	if err != nil {
+	// 		log.Error(err, "failed deletion attempt")
+	// 	}
+	// 	return done && err == nil, nil
+	// })
 }
 
 func (s *Service) Get(ctx context.Context, subscriptionID, resourceGroup, name string) (*Spec, error) {
-	client, err := newClient(s.authorizer, subscriptionID)
+	client, err := s.newClient(s.authorizer, subscriptionID)
 	if err != nil {
 		return nil, err
 	}
@@ -135,19 +141,19 @@ func (s *Service) Get(ctx context.Context, subscriptionID, resourceGroup, name s
 }
 
 func (s *Service) GetCredentials(ctx context.Context, subscriptionID, resourceGroup, name string) ([]byte, error) {
-	client, err := newClient(s.authorizer, subscriptionID)
+	client, err := s.newClient(s.authorizer, subscriptionID)
 	if err != nil {
 		return nil, err
 	}
+	return client.getKubeconfig(ctx, resourceGroup, name)
+	// credentialList, err := client.ListClusterAdminCredentials(ctx, resourceGroup, name)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	credentialList, err := client.ListClusterAdminCredentials(ctx, resourceGroup, name)
-	if err != nil {
-		return nil, err
-	}
+	// if credentialList.Kubeconfigs == nil || len(*credentialList.Kubeconfigs) < 1 {
+	// 	return nil, errors.New("no kubeconfigs available for the aks cluster")
+	// }
 
-	if credentialList.Kubeconfigs == nil || len(*credentialList.Kubeconfigs) < 1 {
-		return nil, errors.New("no kubeconfigs available for the aks cluster")
-	}
-
-	return *(*credentialList.Kubeconfigs)[0].Value, nil
+	// return *(*credentialList.Kubeconfigs)[0].Value, nil
 }

@@ -9,6 +9,9 @@ spec:
   name: ace-cli
   sshPublicKey: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDnafEQ91LfDdcpuPP52nxVkwgdDXhbZHFUsSLdfPYWsbgv+1+nThMBimYWIUmnoQnlFaz9lEbvj7gh+oZf/DEaLHNdFgI0JTAroI4hgHShGL/dg+javFp2b2TqpAmDditsA1xxsSPNsWCqSkcD1vOh6/ucX0QT50yI+lf/CuB+5HadC47b5fB0yFeipLe8HhkAdipuoSEuY5wpt37nsSDIeLVHUPRbSSPt14h1Ot2ni3vQGsyfZgGvDa/GT7tq3FZbQe7n7EIhqA8vdtey1+iztBXJIjqkO0nUwJM/aTvhbgwg1sKWH5xmb61vKQpmTP2imgcn5YMMxLr11hED13v7 ace@ace-x1
   version: 1.16.4
+  credentialsRef:
+    name: azure-creds
+    namespace: azsvc-system
   nodePools:
   - name: small
     sku: Standard_B2ms

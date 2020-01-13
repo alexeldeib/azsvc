@@ -1,6 +1,5 @@
-
 # Image URL to use all building/pushing image targets
-IMG ?= alexeldeib/azsvc:latest
+IMG ?= alexeldeib/azsvc
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
@@ -11,7 +10,7 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-all: manifests
+all: manager
 
 # Run tests
 test: generate fmt vet manifests
@@ -56,12 +55,12 @@ generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 # Build the docker image
-docker-build:
-	docker build . -t ${IMG}
+docker-build: manifests
+	docker build . -t ${IMG}:latest
 
 # Push the docker image
 docker-push:
-	docker push ${IMG}
+	docker push ${IMG}:latest
 
 # find or download controller-gen
 # download controller-gen if necessary

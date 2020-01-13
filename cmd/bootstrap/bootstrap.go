@@ -92,8 +92,8 @@ func main() {
 	}
 
 	log = log.WithValues("gvk", object.GroupVersionKind().String(), "name", object.Name)
-	clusterSvc := managedclusters.NewService(authorizer, log)
-	if err := clusterSvc.Ensure(context.Background(), object, creds); err != nil {
+	clusterSvc := managedclusters.NewService(authorizer)
+	if err := clusterSvc.Ensure(context.Background(), log, object, creds); err != nil {
 		log.Error(err, "failed to reconcile cluster")
 	} else {
 		log.Info("reconciled successfully")
@@ -119,7 +119,7 @@ func main() {
 			Spec: val,
 		}
 		log := log.WithValues("agentpool", pool.Spec.Name)
-		if err := agentpools.NewService(authorizer, log).Ensure(context.Background(), pool); err != nil {
+		if err := agentpools.NewService(authorizer).Ensure(context.Background(), log, pool); err != nil {
 			failed = true
 			log.Error(err, fmt.Sprintf("failed to updated agent pool: %s", val.Name))
 		}

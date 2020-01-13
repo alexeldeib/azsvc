@@ -2,6 +2,8 @@ package agentpools
 
 import (
 	"github.com/Azure/azure-sdk-for-go/services/containerservice/mgmt/2019-11-01/containerservice"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 var defaultUser string = "azureuser"
@@ -14,6 +16,7 @@ type Spec struct {
 	group          string
 	cluster        string
 	internal       containerservice.AgentPool
+	old            containerservice.AgentPool
 }
 
 func defaultSpec() *Spec {
@@ -28,6 +31,7 @@ func defaultSpec() *Spec {
 }
 
 func (s *Spec) Set(options ...specOption) {
+	s.old = s.internal
 	for _, option := range options {
 		s = option(s)
 	}
@@ -35,6 +39,13 @@ func (s *Spec) Set(options ...specOption) {
 
 func (s *Spec) Exists() bool {
 	return s.internal.ID != nil
+}
+
+func (s *Spec) Diff() string {
+	ignored := []cmp.Option{
+		cmpopts.IgnoreFields(containerservice.AgentPool{}, "Response"),
+	}
+	return cmp.Diff(s.internal, s.old, ignored...)
 }
 
 func Name(name string) specOption {
@@ -65,9 +76,9 @@ func ResourceGroup(group string) specOption {
 	}
 }
 
-func KubernetesVersion(version string) specOption {
+func KubernetesVersion(version *string) specOption {
 	return func(o *Spec) *Spec {
-		o.internal.OrchestratorVersion = &version
+		o.internal.OrchestratorVersion = version
 		return o
 	}
 }
