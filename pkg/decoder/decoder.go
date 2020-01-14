@@ -22,7 +22,7 @@ func (d *YamlDecoder) Decode(defaults *schema.GroupVersionKind, into runtime.Obj
 	for {
 		doc, err := d.reader.Read()
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, nil, err
 		}
 
 		//  Skip over empty documents, i.e. a leading `---`

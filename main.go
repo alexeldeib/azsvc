@@ -16,7 +16,6 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured/unstructuredscheme"
 
 	"github.com/alexeldeib/azsvc/pkg/services/agentpools"
 	"github.com/alexeldeib/azsvc/pkg/services/managedclusters"
@@ -32,8 +31,7 @@ func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 	_ = apiextensionsv1.AddToScheme(scheme)
 	_ = apiextensionsv1beta1.AddToScheme(scheme)
-	_ = unstructuredscheme.AddToScheme(scheme)
-	
+
 	_ = azurev1alpha1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
@@ -41,16 +39,18 @@ func init() {
 func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
+	var debug bool
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
+	flag.BoolVar(&debug, "debug", false, "more verbose logs will print when debug is true.")
 	flag.Parse()
 
 	ctrl.SetLogger(
 		zap.New(
 			zap.RawZapOpts(realzap.AddCaller()),
 			func(o *zap.Options) {
-				o.Development = true
+				o.Development = debug
 			},
 		),
 	)

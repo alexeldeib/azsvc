@@ -74,13 +74,13 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 		log.V(2).Info("will try to add finalizer")
 		if !finalizer.Has(obj, constants.Finalizer) {
 			finalizer.Add(obj, constants.Finalizer)
-			log.Info("added finalizer")
+			log.V(1).Info("added finalizer")
 			return ctrl.Result{}, r.Update(ctx, obj)
 		}
 	} else {
 		log.V(2).Info("checking for finalizer")
 		if finalizer.Has(obj, constants.Finalizer) {
-			log.Info("finalizer present, invoking deletion")
+			log.V(1).Info("finalizer present, invoking deletion")
 			if err := r.ClusterService.Delete(ctx, log, obj); err != nil {
 				return ctrl.Result{}, err
 			}
@@ -178,7 +178,6 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			// ace: in memory version of filesys did not work on initial attempt
 			fs := filesys.MakeFsOnDisk()
 			koptions := krusty.MakeDefaultOptions()
-			koptions.DoLegacyResourceSort = false
 			kustomizer := krusty.MakeKustomizer(fs, koptions)
 
 			// Potentially we may have many kustomizations to apply.
@@ -206,7 +205,8 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 						break
 					} else if err != nil {
 						if runtime.IsNotRegisteredError(err) {
-							log.Error(err, "failed to recognize object")
+							log.V(1).Info("failed to recognize object")
+							log.V(1).Info(err.Error())
 							var yamldata map[string]interface{}
 							if fail := yaml.Unmarshal(raw, &yamldata); fail != nil {
 								log.Error(fail, "failed to unmarshal object as unstructured")
@@ -233,7 +233,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 		}
 		// END Kustomization
 	}
-
+	log.V(1).Info("successfully reconciled")
 	return ctrl.Result{RequeueAfter: time.Second * 60}, nil
 }
 
