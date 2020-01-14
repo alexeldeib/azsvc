@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -237,7 +238,9 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			// Apply objects output from kustomization, one by one
 			for i := range objects {
 				if _, err := controllerutil.CreateOrUpdate(ctx, kubeclient, objects[i], func() error { return nil }); err != nil {
-					return ctrl.Result{}, err
+					metaObj, _ := objects[i].(metav1.Object)
+					log.WithName("target").WithValues("gvk", objects[i].GetObjectKind().GroupVersionKind().String(), "name", metaObj.GetName(), "namespace", metaObj.GetNamespace()).Error(err, "")
+					return ctrl.Result{}, errors.Wrap(err, "failed to create object")
 				}
 			}
 		}
