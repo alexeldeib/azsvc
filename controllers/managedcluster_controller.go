@@ -215,6 +215,13 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			}
 		}
 
+		// Apply any/all objects we found!
+		// TODO(ace): this probably won't scale...we are basically polling every minute
+		// and applying all resources. Consider scalability changes:
+		// - polling duration
+		// - diff objects on apply, or use server-side apply, or kubectl apply
+		// - use a list and send all objects to server at once
+		// - use some event based model to avoid polling to sync :(
 		if objects != nil {
 			// Construct remote client
 			// TODO(ace): simplify. If we can remove dep on clientcmd, we can run manager.exe on windows again.
