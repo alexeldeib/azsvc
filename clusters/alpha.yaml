@@ -23,4 +23,3 @@ spec:
     osDiskSizeGb: 500
   kustomizations:
   - https://github.com/alexeldeib/cd-example
-  - https://github.com/coreos/prometheus-operator
