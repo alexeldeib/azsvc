@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"github.com/Azure/go-autorest/autorest"
-	"github.com/alexeldeib/azsvc/pkg/errors"
+
+	"github.com/alexeldeib/azsvc/pkg/autoutil"
 )
 
 type Service struct {
@@ -23,7 +24,7 @@ func (s *Service) Delete(ctx context.Context, subscriptionID, group, vmss, insta
 		return err
 	}
 	err = client.delete(ctx, group, vmss, instance)
-	if err != nil && errors.IsNotFound(err) {
+	if err != nil && autoutil.IsNotFound(err) {
 		return nil
 	}
 	return err

@@ -11,7 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/alexeldeib/azsvc/api/v1alpha1"
-	"github.com/alexeldeib/azsvc/pkg/errors"
+	"github.com/alexeldeib/azsvc/pkg/autoutil"
 )
 
 const (
@@ -91,7 +91,7 @@ func (s *Service) Delete(ctx context.Context, log logr.Logger, obj *v1alpha1.Age
 		return err
 	}
 	err = client.delete(ctx, obj.Spec.ResourceGroup, obj.Spec.Name, obj.Spec.Cluster)
-	if err != nil && errors.IsNotFound(err) {
+	if err != nil && autoutil.IsNotFound(err) {
 		return nil
 	}
 	return err
@@ -105,7 +105,7 @@ func (s *Service) Get(ctx context.Context, subscriptionID, resourceGroup, cluste
 
 	result, err := client.get(ctx, resourceGroup, cluster, name)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if autoutil.IsNotFound(err) {
 			return defaultSpec(name), nil
 		}
 		return nil, err

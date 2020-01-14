@@ -8,11 +8,12 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/containerservice/mgmt/2019-11-01/containerservice"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
-	"github.com/alexeldeib/azsvc/api/v1alpha1"
-	azerr "github.com/alexeldeib/azsvc/pkg/errors"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
+
+	"github.com/alexeldeib/azsvc/api/v1alpha1"
+	"github.com/alexeldeib/azsvc/pkg/autoutil"
 )
 
 const (
@@ -100,7 +101,7 @@ func (s *Service) Delete(ctx context.Context, log logr.Logger, obj *v1alpha1.Man
 	log.V(1).Info("beginning long delete operation")
 	err = client.delete(ctx, log, obj.Spec.ResourceGroup, obj.Spec.Name)
 	if err != nil {
-		if azerr.IsNotFound(err) {
+		if autoutil.IsNotFound(err) {
 			return nil
 		}
 		return err
@@ -117,7 +118,7 @@ func (s *Service) Get(ctx context.Context, subscriptionID, resourceGroup, name s
 
 	result, err := client.Get(ctx, resourceGroup, name)
 	if err != nil {
-		if azerr.IsNotFound(err) {
+		if autoutil.IsNotFound(err) {
 			return defaultSpec(name), nil
 		}
 		return nil, err

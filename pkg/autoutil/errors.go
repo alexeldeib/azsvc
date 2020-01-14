@@ -1,4 +1,4 @@
-package errors
+package autoutil
 
 import "github.com/Azure/go-autorest/autorest"
 

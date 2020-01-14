@@ -27,4 +27,4 @@ spec:
   - github.com/alexeldeib/azsvc/workloads/certmanager?ref=ace/svc-dev
   - github.com/juan-lee/stressed/config/default?ref=master
   manifests:
-  - https://gist.githubusercontent.com/alexeldeib/ba6d782d12d3606a4054fd5af56e621d/raw/e631714f280d572fcf33d29e439e2f299be00074/stress.yaml
+  - https://gist.githubusercontent.com/alexeldeib/ba6d782d12d3606a4054fd5af56e621d/raw/fe1eba125c488b92a5eda0701a8f21f9f5d2ce28/stress.yaml
