@@ -15,11 +15,11 @@ spec:
   nodePools:
   - name: small
     sku: Standard_B2ms
-    replicas: 1
+    replicas: 3
     osDiskSizeGb: 250
   - name: main 
     sku: Standard_D4_v3
-    replicas: 1
+    replicas: 4
     osDiskSizeGb: 500
   kustomizations:
   - https://github.com/alexeldeib/cd-example
