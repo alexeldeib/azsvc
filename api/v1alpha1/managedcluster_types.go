@@ -23,6 +23,8 @@ type ManagedClusterSpec struct {
 	KubeconfigRef *corev1.SecretKeySelector `json:"kubeconfigRef,omitempty"`
 	// Kustomizations is an array of kustomize remote targets to apply to the cluster
 	Kustomizations []string `json:"kustomizations,omitempty"`
+	// Manifests is an array of URLs to raw Kubernetes manifests to apply to the cluster
+	Manifests []string `json:"manifests,omitempty"`
 	// SSHPublicKey is a string literal containing an ssh public key.
 	SSHPublicKey string `json:"sshPublicKey"`
 	// Version defines the kubernetes version of the cluster.

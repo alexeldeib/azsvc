@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
+	"net/http"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -127,7 +129,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 
 	// We may want to store the Kubeconfig from the ManagedCluster in a Kubernetes secret.
 	// Alternatively, we may need the Kubeconfig to apply some Kustomization workloads against the cluster.
-	if obj.Spec.KubeconfigRef != nil || obj.Spec.Kustomizations != nil {
+	if obj.Spec.KubeconfigRef != nil || obj.Spec.Kustomizations != nil || obj.Spec.Manifests != nil {
 		kubeconfigBytes, err := r.ClusterService.GetCredentials(context.Background(), obj.Spec.SubscriptionID, obj.Spec.ResourceGroup, obj.Spec.Name)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -152,30 +154,13 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			}
 		}
 
-		// BEGIN Kustomization
+		var objects []runtime.Object
+
 		// Build and apply kustomized objects
 		if obj.Spec.Kustomizations != nil {
-			// Construct remote client
-			// TODO(ace): simplify. If we can remove dep on clientcmd, we can run manager.exe on windows again.
-			clientconfig, err := clientcmd.NewClientConfigFromBytes(kubeconfigBytes)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			restClient, err := clientconfig.ClientConfig()
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			kubeclient, err := client.New(restClient, client.Options{
-				Scheme: r.Scheme,
-			})
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-
 			// Initialize for kustomization
-			// TODO(ace): does this persist anything on disk, can we use in memory instead
-			// ace: could not find anything persisted to disk (uses /tmp/kustomize**** and files are deleted)
-			// ace: in memory version of filesys did not work on initial attempt
+			// ace: can't use memfs until git cloner is fixed upstream
+			// ace: real fs + git exec used here https://github.com/kubernetes-sigs/kustomize/blob/186df6f7c8aa28774be8f54fa000bf99e95642d6/api/filesys/confirmeddir.go#L20-L31
 			fs := filesys.MakeFsOnDisk()
 			koptions := krusty.MakeDefaultOptions()
 			kustomizer := krusty.MakeKustomizer(fs, koptions)
@@ -198,43 +183,93 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 
 				buf := bytes.NewBuffer(data)
 				d := decoder.NewYAMLDecoder(ioutil.NopCloser(buf), r.Scheme)
-				objects := []runtime.Object{}
-				for {
-					obj, raw, err := d.Decode(nil, nil)
-					if err == io.EOF {
-						break
-					} else if err != nil {
-						if runtime.IsNotRegisteredError(err) {
-							log.V(1).Info("failed to recognize object")
-							log.V(1).Info(err.Error())
-							var yamldata map[string]interface{}
-							if fail := yaml.Unmarshal(raw, &yamldata); fail != nil {
-								log.Error(fail, "failed to unmarshal object as unstructured")
-								return ctrl.Result{}, fail
-							}
-							unstruct := &unstructured.Unstructured{
-								Object: yamldata,
-							}
-							objects = append(objects, unstruct)
-							continue
-						}
-						return ctrl.Result{}, err
-					}
-					objects = append(objects, obj)
+				output, err := decode(d, log)
+				if err != nil {
+					return ctrl.Result{}, err
 				}
+				objects = append(objects, output...)
+			}
+		}
 
-				// Apply objects output from kustomization, one by one
-				for i := range objects {
-					if _, err := controllerutil.CreateOrUpdate(ctx, kubeclient, objects[i], func() error { return nil }); err != nil {
-						return ctrl.Result{}, err
-					}
+		if obj.Spec.Manifests != nil {
+			httpclient := &http.Client{
+				Timeout: time.Second * 10,
+				Transport: &http.Transport{
+					Dial: (&net.Dialer{
+						Timeout: 5 * time.Second,
+					}).Dial,
+					TLSHandshakeTimeout: 5 * time.Second,
+				},
+			}
+			for i := range obj.Spec.Manifests {
+				response, err := httpclient.Get(obj.Spec.Manifests[i])
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+				d := decoder.NewYAMLDecoder(response.Body, r.Scheme)
+				output, err := decode(d, log)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+				objects = append(objects, output...)
+			}
+		}
+
+		if objects != nil {
+			// Construct remote client
+			// TODO(ace): simplify. If we can remove dep on clientcmd, we can run manager.exe on windows again.
+			clientconfig, err := clientcmd.NewClientConfigFromBytes(kubeconfigBytes)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			restClient, err := clientconfig.ClientConfig()
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			kubeclient, err := client.New(restClient, client.Options{
+				Scheme: r.Scheme,
+			})
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			// Apply objects output from kustomization, one by one
+			for i := range objects {
+				if _, err := controllerutil.CreateOrUpdate(ctx, kubeclient, objects[i], func() error { return nil }); err != nil {
+					return ctrl.Result{}, err
 				}
 			}
 		}
-		// END Kustomization
 	}
 	log.V(1).Info("successfully reconciled")
 	return ctrl.Result{RequeueAfter: time.Second * 60}, nil
+}
+
+func decode(d *decoder.YamlDecoder, log logr.Logger) ([]runtime.Object, error) {
+	var out []runtime.Object
+	for {
+		obj, raw, err := d.Decode(nil, nil)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			if runtime.IsNotRegisteredError(err) {
+				log.V(1).Info("failed to recognize object")
+				log.V(1).Info(err.Error())
+				var yamldata map[string]interface{}
+				if fail := yaml.Unmarshal(raw, &yamldata); fail != nil {
+					log.Error(fail, "failed to unmarshal object as unstructured")
+					return nil, fail
+				}
+				unstruct := &unstructured.Unstructured{
+					Object: yamldata,
+				}
+				out = append(out, unstruct)
+				continue
+			}
+			return nil, err
+		}
+		out = append(out, obj)
+	}
+	return out, nil
 }
 
 func (r *ManagedClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {

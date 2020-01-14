@@ -88,6 +88,12 @@ spec:
             location:
               description: Location is the region where the azure resource resides.
               type: string
+            manifests:
+              description: Manifests is an array of URLs to raw Kubernetes manifests
+                to apply to the cluster
+              items:
+                type: string
+              type: array
             name:
               description: Name is the name of the managed cluster in Azure.
               type: string
