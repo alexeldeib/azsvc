@@ -16,6 +16,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured/unstructuredscheme"
 
 	"github.com/alexeldeib/azsvc/pkg/services/agentpools"
 	"github.com/alexeldeib/azsvc/pkg/services/managedclusters"
@@ -31,7 +32,8 @@ func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 	_ = apiextensionsv1.AddToScheme(scheme)
 	_ = apiextensionsv1beta1.AddToScheme(scheme)
-
+	_ = unstructuredscheme.AddToScheme(scheme)
+	
 	_ = azurev1alpha1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }

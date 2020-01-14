@@ -24,9 +24,9 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/sanity-io/litter"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/clientcmd"
@@ -36,6 +36,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/kustomize/api/filesys"
 	"sigs.k8s.io/kustomize/api/krusty"
+	"sigs.k8s.io/yaml"
 
 	"github.com/alexeldeib/azsvc/api/v1alpha1"
 	azurev1alpha1 "github.com/alexeldeib/azsvc/api/v1alpha1"
@@ -177,7 +178,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			// ace: in memory version of filesys did not work on initial attempt
 			fs := filesys.MakeFsOnDisk()
 			koptions := krusty.MakeDefaultOptions()
-			// koptions.DoLegacyResourceSort = false
+			koptions.DoLegacyResourceSort = false
 			kustomizer := krusty.MakeKustomizer(fs, koptions)
 
 			// Potentially we may have many kustomizations to apply.
@@ -195,33 +196,36 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 				if err != nil {
 					return ctrl.Result{}, err
 				}
+
 				buf := bytes.NewBuffer(data)
 				d := decoder.NewYAMLDecoder(ioutil.NopCloser(buf), r.Scheme)
 				objects := []runtime.Object{}
 				for {
-					obj, _, err := d.Decode(nil, nil)
+					obj, raw, err := d.Decode(nil, nil)
 					if err == io.EOF {
 						break
-						// Note that we are ignoring runtime.IsNotRegisteredError, because we want to use unstructured
-						// TODO(ace): test this...may need reworking for the intended purpose
-						// n.b.: github.com/kubernetes/cli-runtime can do the unstructured with its resource builder...check that out
 					} else if err != nil {
 						if runtime.IsNotRegisteredError(err) {
-							if obj != nil {
-								log.Error(err, "failed to recognize object")
-								litter.Dump(obj)
+							log.Error(err, "failed to recognize object")
+							var yamldata map[string]interface{}
+							if fail := yaml.Unmarshal(raw, &yamldata); fail != nil {
+								log.Error(fail, "failed to unmarshal object as unstructured")
+								return ctrl.Result{}, fail
 							}
+							unstruct := &unstructured.Unstructured{
+								Object: yamldata,
+							}
+							objects = append(objects, unstruct)
 							continue
 						}
-						// } else if err != nil && !runtime.IsNotRegisteredError(err) {
 						return ctrl.Result{}, err
 					}
 					objects = append(objects, obj)
 				}
 
 				// Apply objects output from kustomization, one by one
-				for _, obj := range objects {
-					if _, err := controllerutil.CreateOrUpdate(ctx, kubeclient, obj, func() error { return nil }); err != nil {
+				for i := range objects {
+					if _, err := controllerutil.CreateOrUpdate(ctx, kubeclient, objects[i], func() error { return nil }); err != nil {
 						return ctrl.Result{}, err
 					}
 				}
