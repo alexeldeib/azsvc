@@ -24,7 +24,7 @@ spec:
   kustomizations:
   - https://github.com/alexeldeib/cd-example
   - github.com/alexeldeib/azsvc/workloads/prometheus?ref=ace/svc-dev
-  - github.com/alexeldeib/azsvc/workloads/cert-manager?ref=ace/svc-dev
+  - github.com/alexeldeib/azsvc/workloads/certmanager?ref=ace/svc-dev
   - github.com/juan-lee/stressed/config/default?ref=master
   manifests:
   - https://gist.githubusercontent.com/alexeldeib/ba6d782d12d3606a4054fd5af56e621d/raw/e631714f280d572fcf33d29e439e2f299be00074/stress.yaml
