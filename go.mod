@@ -15,15 +15,15 @@ require (
 	github.com/onsi/ginkgo v1.10.1
 	github.com/onsi/gomega v1.7.0
 	github.com/pkg/errors v0.8.1
-	github.com/prometheus/common v0.4.0
 	github.com/sanity-io/litter v1.2.0
 	github.com/spf13/pflag v1.0.5
 	go.uber.org/zap v1.13.0
-	k8s.io/api v0.17.0
+	k8s.io/api v0.17.1
 	k8s.io/apiextensions-apiserver v0.0.0-20190918161926-8f644eb6e783
-	k8s.io/apimachinery v0.17.0
-	k8s.io/cli-runtime v0.17.0
-	k8s.io/client-go v0.17.0
+	k8s.io/apimachinery v0.17.1
+	k8s.io/cli-runtime v0.17.1
+	k8s.io/client-go v0.17.1
+	k8s.io/kubectl v0.17.1
 	sigs.k8s.io/controller-runtime v0.4.0
 	sigs.k8s.io/kustomize/api v0.3.2
 	sigs.k8s.io/yaml v1.1.0

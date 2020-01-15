@@ -20,25 +20,21 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"net"
-	"net/http"
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/kubectl/pkg/cmd/apply"
+	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/kustomize/api/filesys"
-	"sigs.k8s.io/kustomize/api/krusty"
 	"sigs.k8s.io/yaml"
 
 	"github.com/alexeldeib/azsvc/api/v1alpha1"
@@ -46,6 +42,7 @@ import (
 	"github.com/alexeldeib/azsvc/pkg/constants"
 	"github.com/alexeldeib/azsvc/pkg/decoder"
 	"github.com/alexeldeib/azsvc/pkg/finalizer"
+	"github.com/alexeldeib/azsvc/pkg/remote"
 	"github.com/alexeldeib/azsvc/pkg/services/agentpools"
 	"github.com/alexeldeib/azsvc/pkg/services/managedclusters"
 )
@@ -155,93 +152,55 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			}
 		}
 
-		var objects []runtime.Object
-
-		// Build and apply kustomized objects
-		if obj.Spec.Kustomizations != nil {
-			// Initialize for kustomization
-			// ace: can't use memfs until git cloner is fixed upstream
-			// ace: real fs + git exec used here https://github.com/kubernetes-sigs/kustomize/blob/186df6f7c8aa28774be8f54fa000bf99e95642d6/api/filesys/confirmeddir.go#L20-L31
-			fs := filesys.MakeFsOnDisk()
-			koptions := krusty.MakeDefaultOptions()
-			kustomizer := krusty.MakeKustomizer(fs, koptions)
-
-			// Potentially we may have many kustomizations to apply.
-			for _, path := range obj.Spec.Kustomizations {
-				// Kustomize build
-				resmap, err := kustomizer.Run(path)
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-
-				// We need to extract runtime.Objects from the Kustomize out to apply them with our kubeclient.
-				// The easiest way to do so is to convert everything to yaml, and decode via separators (---)
-				// This gives us an array of runtime.Objects which we can directly CreateOrUpdate on the remote cluster.
-				data, err := resmap.AsYaml()
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-
-				buf := bytes.NewBuffer(data)
-				d := decoder.NewYAMLDecoder(ioutil.NopCloser(buf), r.Scheme)
-				output, err := decode(d, log)
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-				objects = append(objects, output...)
-			}
-		}
-
-		if obj.Spec.Manifests != nil {
-			httpclient := &http.Client{
-				Timeout: time.Second * 10,
-				Transport: &http.Transport{
-					Dial: (&net.Dialer{
-						Timeout: 5 * time.Second,
-					}).Dial,
-					TLSHandshakeTimeout: 5 * time.Second,
-				},
-			}
-			for i := range obj.Spec.Manifests {
-				response, err := httpclient.Get(obj.Spec.Manifests[i])
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-				d := decoder.NewYAMLDecoder(response.Body, r.Scheme)
-				output, err := decode(d, log)
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-				objects = append(objects, output...)
-			}
-		}
-
-		// TODO(ace): this probably won't scale...we are basically polling every minute and applying all resources
-		// Apply any/all objects we found!
-		if objects != nil {
-			// Construct remote client
-			// TODO(ace): simplify. If we can remove dep on clientcmd, we can run manager.exe on windows again.
-			clientconfig, err := clientcmd.NewClientConfigFromBytes(kubeconfigBytes)
+		if obj.Spec.Kustomizations != nil || obj.Spec.Manifests != nil {
+			getter, err := remote.NewRESTClientGetter(kubeconfigBytes)
 			if err != nil {
 				return ctrl.Result{}, err
 			}
-			restClient, err := clientconfig.ClientConfig()
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			kubeclient, err := client.New(restClient, client.Options{
-				Scheme: r.Scheme,
-			})
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			// Apply objects output from kustomization, one by one
-			for i := range objects {
-				if _, err := controllerutil.CreateOrUpdate(ctx, kubeclient, objects[i], func() error { return nil }); err != nil {
-					metaObj, _ := objects[i].(metav1.Object)
-					log.WithName("target").WithValues("gvk", objects[i].GetObjectKind().GroupVersionKind().String(), "name", metaObj.GetName(), "namespace", metaObj.GetNamespace()).Error(err, "")
-					return ctrl.Result{}, errors.Wrap(err, "failed to create object")
+
+			factory := cmdutil.NewFactory(getter)
+
+			for i := range obj.Spec.Kustomizations {
+				url := obj.Spec.Kustomizations[i]
+				stdio := bytes.NewBuffer(nil)
+				errio := bytes.NewBuffer(nil)
+				streams := genericclioptions.IOStreams{In: stdio, Out: stdio, ErrOut: errio}
+				cmd := apply.NewCmdApply("kubectl", factory, streams)
+				opts := apply.NewApplyOptions(streams)
+				opts.DeleteFlags.FileNameFlags.Kustomize = &url
+
+				if err := opts.Complete(factory, cmd); err != nil {
+					log.Error(err, "failed to complete apply options")
+					return ctrl.Result{}, err
 				}
+
+				if err := opts.Run(); err != nil {
+					log.Error(err, "failed to apply")
+					return ctrl.Result{}, err
+				}
+
+				log.V(2).Info("output", "stdio", stdio.String(), "errio", errio.String())
+			}
+
+			if obj.Spec.Manifests != nil {
+				stdio := bytes.NewBuffer(nil)
+				errio := bytes.NewBuffer(nil)
+				streams := genericclioptions.IOStreams{In: stdio, Out: stdio, ErrOut: errio}
+				cmd := apply.NewCmdApply("kubectl", factory, streams)
+				opts := apply.NewApplyOptions(streams)
+				opts.DeleteFlags.FileNameFlags.Filenames = &obj.Spec.Manifests
+
+				if err := opts.Complete(factory, cmd); err != nil {
+					log.Error(err, "failed to complete apply options")
+					return ctrl.Result{}, err
+				}
+
+				if err := opts.Run(); err != nil {
+					log.Error(err, "failed to apply")
+					return ctrl.Result{}, err
+				}
+
+				log.V(2).Info("output", "stdio", stdio.String(), "errio", errio.String())
 			}
 		}
 	}

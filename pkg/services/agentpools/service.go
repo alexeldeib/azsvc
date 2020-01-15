@@ -62,6 +62,7 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Age
 		KubernetesVersion(obj.Spec.Version),
 	)
 
+	// TODO(ace): fix necessity of this
 	diff := spec.Diff()
 	if diff == "" {
 		log.V(1).Info("no update required, found and desired objects equal")

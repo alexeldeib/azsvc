@@ -53,7 +53,8 @@ type ManagedClusterSpec struct {
 
 // ManagedClusterStatus defines the observed state of ManagedCluster
 type ManagedClusterStatus struct {
-	Future []byte `json:"future,omitempty"`
+	Future  []byte                    `json:"future,omitempty"`
+	Applied *[]corev1.ObjectReference `json:"-,omitempty"`
 }
 
 // +kubebuilder:object:root=true
