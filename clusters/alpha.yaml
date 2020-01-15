@@ -28,4 +28,4 @@ spec:
   - github.com/juan-lee/stressed/config/default?ref=master
   manifests:
   # - https://gist.githubusercontent.com/alexeldeib/ba6d782d12d3606a4054fd5af56e621d/raw/8d2eee159674ab2eb4160415e82f5d26dbda1fd1/stress.yaml
-  - https://gist.githubusercontent.com/alexeldeib/755a276aba83311133e964f90dae796c/raw/6d07897dd29b984029b0b957242cb10a59f589af/apply.yaml
+  - https://gist.githubusercontent.com/alexeldeib/755a276aba83311133e964f90dae796c/raw/efae6948267d930efbb43292f5b5aa87675ea859/apply.yaml
