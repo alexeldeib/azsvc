@@ -54,6 +54,11 @@ spec:
         - name: fluent-bit-config
           mountPath: /fluent-bit/etc/
       - name: geneva
+        env:
+        - name: ROLE_INSTANCE
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         image: juanlee/geneva
         imagePullPolicy: Always
         resources:
