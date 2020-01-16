@@ -1,3 +1,5 @@
+namespace: monitoring
+
 resources:
 - namespace.yaml
 - agent-configmap.yaml
@@ -6,4 +8,3 @@ resources:
 - role-binding.yaml
 - role.yaml
 - service-account.yaml
-
