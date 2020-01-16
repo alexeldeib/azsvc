@@ -43,8 +43,8 @@ spec:
             cpu: 5m
             memory: 10Mi
           limits:
-            cpu: 50m
-            memory: 60Mi
+            cpu: 500m
+            memory: 600Mi
         volumeMounts:
         - name: varlog
           mountPath: /var/log
@@ -66,8 +66,8 @@ spec:
             cpu: 5m
             memory: 10Mi
           limits:
-            cpu: 50m
-            memory: 60Mi
+            cpu: 500m
+            memory: 600Mi
         volumeMounts:
         - name: agent-certificates
           mountPath: /etc/mdsd.d/certs
