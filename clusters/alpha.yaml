@@ -22,8 +22,8 @@ spec:
     replicas: 4
     osDiskSizeGb: 500
   kustomizations:
-  - https://github.com/alexeldeib/cd-example
-  - github.com/alexeldeib/azsvc/workloads/prometheus?ref=ace/svc-dev
+  # - https://github.com/alexeldeib/cd-example
+  # - github.com/alexeldeib/azsvc/workloads/prometheus?ref=ace/svc-dev
   # - github.com/alexeldeib/azsvc/workloads/certmanager?ref=ace/svc-dev
   # - github.com/juan-lee/stressed/config/default?ref=master
   manifests:
