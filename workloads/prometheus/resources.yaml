@@ -45023,7 +45023,7 @@ spec:
   podMonitorSelector: {}
   replicas: 2
   remoteWrite:
-  - url: prom-to-log.monitoring:9090
+  - url: prom-to-log.monitoring
   resources:
     requests:
       memory: 400Mi
