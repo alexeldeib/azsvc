@@ -34,5 +34,5 @@ spec:
   objectRefs:
   - kind: Secret
     apiVersion: v1
-    name: gcscert
-    namespace: default
+    name: agent-certificates
+    namespace: monitoring
