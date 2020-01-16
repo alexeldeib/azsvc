@@ -46456,7 +46456,8 @@ spec:
         summary: "Unusual disk write rate (instance {{ $labels.instance }})"
         description: "Disk is probably writing too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: HighWeightedDiskSaturation
-      expr: instance_device:node_disk_io_time_weighted_seconds:rate1m{job="node-exporter"} > 90
+      expr: |
+        instance_device:node_disk_io_time_weighted_seconds:rate1m{job="node-exporter"} > 90
       for: 5m
       labels:
         severity: warning
@@ -46464,7 +46465,8 @@ spec:
         summary: "High weighted disk saturation for device {{ $labels.device}} on instance {{ $labels.instance }}"
         description: "saturation == queuesz * busy time is too high: VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: HighDiskSaturation
-      expr: instance_device:node_disk_io_time_seconds:rate1m{job="node-exporter"} > 90
+      expr: |
+        instance_device:node_disk_io_time_seconds:rate1m{job="node-exporter"} > 90
       for: 5m
       labels:
         severity: warning
