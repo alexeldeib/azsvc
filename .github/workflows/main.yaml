@@ -5,8 +5,8 @@ on:
         - cron: '0 */4 * * *'
     push:
         branches:
-            - master
-            - 'ace/dev'
+            # - master
+            # - 'ace/dev'
             - 'ace/svc-dev'
 env:
     DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -99,3 +99,8 @@ jobs:
             kustomize build ./config/flux | kubectl --kubeconfig ./kubeconfig apply -f -
             kubectl --kubeconfig ./kubeconfig create secret generic -n flux-mgmt flux-git-deploy-mgmt --dry-run=true --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
             kubectl --kubeconfig ./kubeconfig create secret generic -n flux-clusters flux-git-deploy-clusters --dry-run=true --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
+            az keyvault secret download --vault-name aks-dataplane-test -n geneva-agent -e base64 -f cert.pfx
+            openssl pkcs12 -nocerts -nodes -passin pass: -in cert.pfx -out gcskey.pem && openssl rsa -in gcskey.pem -out gcskey.pem
+            openssl pkcs12 -nokeys -nodes -passin pass: -in cert.pfx -out gcscert.pem && openssl x509 -in gcscert.pem -out gcscert.pem
+            kubectl --kubeconfig ./kubeconfig create secret generic gcscert --dry-run=true --from-file=gcscert.pem=gcscert.pem --from-file=gcskey.pem=gcskey.pem -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
+            rm gcskey.pem gcscert.pem cert.pfx kubeconfig
