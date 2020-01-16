@@ -65,7 +65,7 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Age
 	// TODO(ace): fix necessity of this
 	diff := spec.Diff()
 	if diff == "" {
-		log.V(1).Info("no update required, found and desired objects equal")
+		log.V(2).Info("no update required, found and desired objects equal")
 		return nil
 	}
 	fmt.Printf("update required (+want -have):\n%s", diff)
