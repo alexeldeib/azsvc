@@ -58,7 +58,7 @@ spec:
         - name: ROLE_INSTANCE
           valueFrom:
             fieldRef:
-              fieldPath: metadata.name
+              fieldPath: spec.nodeName
         image: juanlee/geneva
         imagePullPolicy: Always
         resources:
