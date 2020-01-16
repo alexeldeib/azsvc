@@ -46466,7 +46466,7 @@ spec:
         description: "saturation == queuesz * busy time is too high: VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: HighDiskSaturation
       expr: |
-        instance_device:node_disk_io_time_seconds:rate1m{job="node-exporter"} > 90
+        instance_device:node_disk_io_time_seconds:rate1m{job="node-exporter"} > .8
       for: 5m
       labels:
         severity: warning
