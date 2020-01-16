@@ -45022,6 +45022,8 @@ spec:
   podMonitorNamespaceSelector: {}
   podMonitorSelector: {}
   replicas: 2
+  remoteWrite:
+  - url: prom-to-log.monitoring.svc.cluster.local
   resources:
     requests:
       memory: 400Mi
