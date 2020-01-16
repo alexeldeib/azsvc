@@ -277,6 +277,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 				Namespace: ref.Namespace,
 				Name:      ref.Name,
 			}
+
 			obj := new(unstructured.Unstructured)
 			obj.SetAPIVersion(ref.APIVersion)
 			obj.SetKind(ref.Kind)
@@ -298,12 +299,11 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 				timestamp := old.GetCreationTimestamp()
 				rv := old.GetResourceVersion()
 				uid := old.GetUID()
-
 				old.SetUnstructuredContent(obj.UnstructuredContent())
-
 				old.SetCreationTimestamp(timestamp)
 				old.SetUID(uid)
 				old.SetResourceVersion(rv)
+
 				return nil
 			}); err != nil {
 				return ctrl.Result{}, errors.Wrap(err, "failed to apply local object to remote cluster")

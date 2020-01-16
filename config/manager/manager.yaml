@@ -31,7 +31,7 @@ spec:
         - /manager
         args:
         - --enable-leader-election
-        - --debug
+        # - --debug
         env:
         - name: AZURE_AUTH_LOCATION
           value: /etc/secret/azure.json
