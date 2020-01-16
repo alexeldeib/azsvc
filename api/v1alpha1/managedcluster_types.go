@@ -24,7 +24,8 @@ type ManagedClusterSpec struct {
 	// Kustomizations is an array of kustomize remote targets to apply to the cluster
 	Kustomizations []string `json:"kustomizations,omitempty"`
 	// Manifests is an array of URLs to raw Kubernetes manifests to apply to the cluster
-	Manifests []string `json:"manifests,omitempty"`
+	Manifests  []string                 `json:"manifests,omitempty"`
+	ObjectRefs []corev1.ObjectReference `json:"objectRefs,omitempty"`
 	// SSHPublicKey is a string literal containing an ssh public key.
 	SSHPublicKey string `json:"sshPublicKey"`
 	// Version defines the kubernetes version of the cluster.
@@ -53,8 +54,8 @@ type ManagedClusterSpec struct {
 
 // ManagedClusterStatus defines the observed state of ManagedCluster
 type ManagedClusterStatus struct {
-	Future  []byte                    `json:"future,omitempty"`
-	Applied *[]corev1.ObjectReference `json:"-,omitempty"`
+	Future  []byte                   `json:"future,omitempty"`
+	Applied []corev1.ObjectReference `json:"-,omitempty"`
 }
 
 // +kubebuilder:object:root=true
