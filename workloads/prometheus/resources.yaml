@@ -46463,13 +46463,13 @@ spec:
       annotations:
         summary: "High weighted disk saturation for device {{ $labels.device}} on instance {{ $labels.instance }}"
         description: "saturation == queuesz * busy time is too high: VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-    - alert: HighWeightedDiskSaturation
-      expr: instance_device:node_disk_io_time_weighted_seconds:rate1m{job="node-exporter"} > 90
+    - alert: HighDiskSaturation
+      expr: instance_device:node_disk_io_time_seconds:rate1m{job="node-exporter"} > 90
       for: 5m
       labels:
         severity: warning
       annotations:
-        summary: "High weighted disk saturation for device {{ $labels.device}} on instance {{ $labels.instance }}"
+        summary: "High disk saturation for device {{ $labels.device}} on instance {{ $labels.instance }}"
         description: "saturation == queuesz * busy time is too high: VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 ---
 apiVersion: monitoring.coreos.com/v1
