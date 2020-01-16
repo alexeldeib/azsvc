@@ -1,0 +1,9 @@
+resources:
+- namespace.yaml
+- agent-configmap.yaml
+- configmap.yaml
+- daemonset.yaml
+- role-binding.yaml
+- role.yaml
+- service-account.yaml
+

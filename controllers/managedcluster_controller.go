@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -185,93 +186,129 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			diff[ref] = true
 		}
 
-		// START NEW ATTEMPT
-		if managedCluster.Spec.Kustomizations != nil || managedCluster.Spec.Manifests != nil {
-			getter, err := remote.NewRESTClientGetter(kubeconfigBytes)
-			if err != nil {
+		getter, err := remote.NewRESTClientGetter(kubeconfigBytes)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		factory := cmdutil.NewFactory(getter)
+
+		for i := range managedCluster.Spec.Kustomizations {
+			url := managedCluster.Spec.Kustomizations[i]
+			stdio := bytes.NewBuffer(nil)
+			errio := bytes.NewBuffer(nil)
+			streams := genericclioptions.IOStreams{In: stdio, Out: stdio, ErrOut: errio}
+			cmd := apply.NewCmdApply("kubectl", factory, streams)
+			opts := apply.NewApplyOptions(streams)
+			opts.DeleteFlags.FileNameFlags.Kustomize = &url
+
+			if err := opts.Complete(factory, cmd); err != nil {
+				log.Error(err, "failed to complete apply options")
 				return ctrl.Result{}, err
 			}
 
-			factory := cmdutil.NewFactory(getter)
+			v := factory.NewBuilder().
+				Unstructured().
+				Schema(opts.Validator).
+				ContinueOnError().
+				NamespaceParam(opts.Namespace).DefaultNamespace().
+				FilenameParam(opts.EnforceNamespace, &opts.DeleteOptions.FilenameOptions).
+				LabelSelectorParam(opts.Selector).
+				Flatten().
+				Do()
 
-			for i := range managedCluster.Spec.Kustomizations {
-				url := managedCluster.Spec.Kustomizations[i]
-				stdio := bytes.NewBuffer(nil)
-				errio := bytes.NewBuffer(nil)
-				streams := genericclioptions.IOStreams{In: stdio, Out: stdio, ErrOut: errio}
-				cmd := apply.NewCmdApply("kubectl", factory, streams)
-				opts := apply.NewApplyOptions(streams)
-				opts.DeleteFlags.FileNameFlags.Kustomize = &url
-
-				if err := opts.Complete(factory, cmd); err != nil {
-					log.Error(err, "failed to complete apply options")
-					return ctrl.Result{}, err
+			err = v.Visit(func(info *resource.Info, err error) error {
+				if err != nil {
+					return err
 				}
+				runObjs = append(runObjs, info.Object)
+				return nil
+			})
 
-				v := factory.NewBuilder().
-					Unstructured().
-					Schema(opts.Validator).
-					ContinueOnError().
-					NamespaceParam(opts.Namespace).DefaultNamespace().
-					FilenameParam(opts.EnforceNamespace, &opts.DeleteOptions.FilenameOptions).
-					LabelSelectorParam(opts.Selector).
-					Flatten().
-					Do()
-
-				err = v.Visit(func(info *resource.Info, err error) error {
-					if err != nil {
-						return err
-					}
-					runObjs = append(runObjs, info.Object)
-					return nil
-				})
-
-				if err := opts.Run(); err != nil {
-					log.Error(err, "failed to apply")
-					return ctrl.Result{}, err
-				}
-
-				log.V(2).Info("output", "stdio", stdio.String(), "errio", errio.String())
+			if err := opts.Run(); err != nil {
+				log.Error(err, "failed to apply")
+				return ctrl.Result{}, err
 			}
 
-			if managedCluster.Spec.Manifests != nil {
-				stdio := bytes.NewBuffer(nil)
-				errio := bytes.NewBuffer(nil)
-				streams := genericclioptions.IOStreams{In: stdio, Out: stdio, ErrOut: errio}
-				cmd := apply.NewCmdApply("kubectl", factory, streams)
-				opts := apply.NewApplyOptions(streams)
-				opts.DeleteFlags.FileNameFlags.Filenames = &managedCluster.Spec.Manifests
+			log.V(2).Info("output", "stdio", stdio.String(), "errio", errio.String())
+		}
 
-				if err := opts.Complete(factory, cmd); err != nil {
-					log.Error(err, "failed to complete apply options")
-					return ctrl.Result{}, err
-				}
+		if managedCluster.Spec.Manifests != nil {
+			stdio := bytes.NewBuffer(nil)
+			errio := bytes.NewBuffer(nil)
+			streams := genericclioptions.IOStreams{In: stdio, Out: stdio, ErrOut: errio}
+			cmd := apply.NewCmdApply("kubectl", factory, streams)
+			opts := apply.NewApplyOptions(streams)
+			opts.DeleteFlags.FileNameFlags.Filenames = &managedCluster.Spec.Manifests
 
-				v := factory.NewBuilder().
-					Unstructured().
-					Schema(opts.Validator).
-					ContinueOnError().
-					NamespaceParam(opts.Namespace).DefaultNamespace().
-					FilenameParam(opts.EnforceNamespace, &opts.DeleteOptions.FilenameOptions).
-					LabelSelectorParam(opts.Selector).
-					Flatten().
-					Do()
-
-				err = v.Visit(func(info *resource.Info, err error) error {
-					if err != nil {
-						return err
-					}
-					runObjs = append(runObjs, info.Object)
-					return nil
-				})
-
-				if err := opts.Run(); err != nil {
-					log.Error(err, "failed to apply")
-					return ctrl.Result{}, err
-				}
-
-				log.V(2).Info("output", "stdio", stdio.String(), "errio", errio.String())
+			if err := opts.Complete(factory, cmd); err != nil {
+				log.Error(err, "failed to complete apply options")
+				return ctrl.Result{}, err
 			}
+
+			v := factory.NewBuilder().
+				Unstructured().
+				Schema(opts.Validator).
+				ContinueOnError().
+				NamespaceParam(opts.Namespace).DefaultNamespace().
+				FilenameParam(opts.EnforceNamespace, &opts.DeleteOptions.FilenameOptions).
+				LabelSelectorParam(opts.Selector).
+				Flatten().
+				Do()
+
+			err = v.Visit(func(info *resource.Info, err error) error {
+				if err != nil {
+					return err
+				}
+				runObjs = append(runObjs, info.Object)
+				return nil
+			})
+
+			if err := opts.Run(); err != nil {
+				log.Error(err, "failed to apply")
+				return ctrl.Result{}, err
+			}
+
+			log.V(2).Info("output", "stdio", stdio.String(), "errio", errio.String())
+		}
+
+		for i := range managedCluster.Spec.ObjectRefs {
+			ref := managedCluster.Spec.ObjectRefs[i]
+			key := types.NamespacedName{
+				Namespace: ref.Namespace,
+				Name:      ref.Name,
+			}
+			obj := new(unstructured.Unstructured)
+			obj.SetAPIVersion(ref.APIVersion)
+			obj.SetKind(ref.Kind)
+			if err := r.Get(ctx, key, obj); err != nil {
+				return ctrl.Result{}, errors.Wrap(err, "failed to get object ref to slingshot")
+			}
+
+			runObjs = append(runObjs, obj)
+
+			old := obj.DeepCopy()
+			zero := metav1.Time{
+				Time: time.Time{},
+			}
+			old.SetCreationTimestamp(zero)
+			old.SetUID("")
+			old.SetResourceVersion("")
+
+			if _, err := controllerutil.CreateOrUpdate(ctx, kubeclient, old, func() error {
+				timestamp := old.GetCreationTimestamp()
+				rv := old.GetResourceVersion()
+				uid := old.GetUID()
+
+				old.SetUnstructuredContent(obj.UnstructuredContent())
+
+				old.SetCreationTimestamp(timestamp)
+				old.SetUID(uid)
+				old.SetResourceVersion(rv)
+				return nil
+			}); err != nil {
+				return ctrl.Result{}, errors.Wrap(err, "failed to apply local object to remote cluster")
+			}
+			runObjs = append(runObjs, obj)
 		}
 
 		// set difference old and new applied objects
