@@ -143,7 +143,7 @@ spec:
                 type: object
               minItems: 1
               type: array
-            objectRef:
+            objectRefs:
               items:
                 description: ObjectReference contains enough information to let you
                   inspect or modify the referred object.

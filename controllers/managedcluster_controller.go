@@ -20,33 +20,32 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"net"
-	"net/http"
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	apiyaml "k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/cli-runtime/pkg/resource"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/kubectl/pkg/cmd/apply"
+	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/kustomize/api/filesys"
-	"sigs.k8s.io/kustomize/api/krusty"
 	"sigs.k8s.io/yaml"
 
 	"github.com/alexeldeib/azsvc/api/v1alpha1"
 	azurev1alpha1 "github.com/alexeldeib/azsvc/api/v1alpha1"
 	"github.com/alexeldeib/azsvc/pkg/constants"
-	"github.com/alexeldeib/azsvc/pkg/decoder"
 	"github.com/alexeldeib/azsvc/pkg/finalizer"
+	"github.com/alexeldeib/azsvc/pkg/remote"
 	"github.com/alexeldeib/azsvc/pkg/services/agentpools"
 	"github.com/alexeldeib/azsvc/pkg/services/managedclusters"
 )
@@ -162,67 +161,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			}
 		}
 
-		var objects []Object
-
-		// Build and apply kustomized objects
-		if managedCluster.Spec.Kustomizations != nil {
-			// Initialize for kustomization
-			// ace: can't use memfs until git cloner is fixed upstream
-			// ace: real fs + git exec used here https://github.com/kubernetes-sigs/kustomize/blob/186df6f7c8aa28774be8f54fa000bf99e95642d6/api/filesys/confirmeddir.go#L20-L31
-			fs := filesys.MakeFsOnDisk()
-			koptions := krusty.MakeDefaultOptions()
-			kustomizer := krusty.MakeKustomizer(fs, koptions)
-
-			// Potentially we may have many kustomizations to apply.
-			for _, path := range managedCluster.Spec.Kustomizations {
-				// Kustomize build
-				resmap, err := kustomizer.Run(path)
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-
-				// We need to extract runtime.Objects from the Kustomize out to apply them with our kubeclient.
-				// The easiest way to do so is to convert everything to yaml, and decode via separators (---)
-				// This gives us an array of runtime.Objects which we can directly CreateOrUpdate on the remote cluster.
-				data, err := resmap.AsYaml()
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-
-				buf := bytes.NewBuffer(data)
-				d := decoder.NewYAMLDecoder(ioutil.NopCloser(buf), r.Scheme)
-				output, err := decode(d, log)
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-				objects = append(objects, output...)
-			}
-		}
-
-		// Fetch and apply raw kubernetes manifests
-		if managedCluster.Spec.Manifests != nil {
-			httpclient := &http.Client{
-				Timeout: time.Second * 10,
-				Transport: &http.Transport{
-					Dial: (&net.Dialer{
-						Timeout: 5 * time.Second,
-					}).Dial,
-					TLSHandshakeTimeout: 5 * time.Second,
-				},
-			}
-			for i := range managedCluster.Spec.Manifests {
-				response, err := httpclient.Get(managedCluster.Spec.Manifests[i])
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-				d := decoder.NewYAMLDecoder(response.Body, r.Scheme)
-				output, err := decode(d, log)
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-				objects = append(objects, output...)
-			}
-		}
+		var runObjs []runtime.Object
 
 		// Build kubeconfig for remote workload cluster
 		clientconfig, err := clientcmd.NewClientConfigFromBytes(kubeconfigBytes)
@@ -246,8 +185,99 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			diff[ref] = true
 		}
 
+		// START NEW ATTEMPT
+		if managedCluster.Spec.Kustomizations != nil || managedCluster.Spec.Manifests != nil {
+			getter, err := remote.NewRESTClientGetter(kubeconfigBytes)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+
+			factory := cmdutil.NewFactory(getter)
+
+			for i := range managedCluster.Spec.Kustomizations {
+				url := managedCluster.Spec.Kustomizations[i]
+				stdio := bytes.NewBuffer(nil)
+				errio := bytes.NewBuffer(nil)
+				streams := genericclioptions.IOStreams{In: stdio, Out: stdio, ErrOut: errio}
+				cmd := apply.NewCmdApply("kubectl", factory, streams)
+				opts := apply.NewApplyOptions(streams)
+				opts.DeleteFlags.FileNameFlags.Kustomize = &url
+
+				if err := opts.Complete(factory, cmd); err != nil {
+					log.Error(err, "failed to complete apply options")
+					return ctrl.Result{}, err
+				}
+
+				v := factory.NewBuilder().
+					Unstructured().
+					Schema(opts.Validator).
+					ContinueOnError().
+					NamespaceParam(opts.Namespace).DefaultNamespace().
+					FilenameParam(opts.EnforceNamespace, &opts.DeleteOptions.FilenameOptions).
+					LabelSelectorParam(opts.Selector).
+					Flatten().
+					Do()
+
+				err = v.Visit(func(info *resource.Info, err error) error {
+					if err != nil {
+						return err
+					}
+					runObjs = append(runObjs, info.Object)
+					return nil
+				})
+
+				if err := opts.Run(); err != nil {
+					log.Error(err, "failed to apply")
+					return ctrl.Result{}, err
+				}
+
+				log.V(2).Info("output", "stdio", stdio.String(), "errio", errio.String())
+			}
+
+			if managedCluster.Spec.Manifests != nil {
+				stdio := bytes.NewBuffer(nil)
+				errio := bytes.NewBuffer(nil)
+				streams := genericclioptions.IOStreams{In: stdio, Out: stdio, ErrOut: errio}
+				cmd := apply.NewCmdApply("kubectl", factory, streams)
+				opts := apply.NewApplyOptions(streams)
+				opts.DeleteFlags.FileNameFlags.Filenames = &managedCluster.Spec.Manifests
+
+				if err := opts.Complete(factory, cmd); err != nil {
+					log.Error(err, "failed to complete apply options")
+					return ctrl.Result{}, err
+				}
+
+				v := factory.NewBuilder().
+					Unstructured().
+					Schema(opts.Validator).
+					ContinueOnError().
+					NamespaceParam(opts.Namespace).DefaultNamespace().
+					FilenameParam(opts.EnforceNamespace, &opts.DeleteOptions.FilenameOptions).
+					LabelSelectorParam(opts.Selector).
+					Flatten().
+					Do()
+
+				err = v.Visit(func(info *resource.Info, err error) error {
+					if err != nil {
+						return err
+					}
+					runObjs = append(runObjs, info.Object)
+					return nil
+				})
+
+				if err := opts.Run(); err != nil {
+					log.Error(err, "failed to apply")
+					return ctrl.Result{}, err
+				}
+
+				log.V(2).Info("output", "stdio", stdio.String(), "errio", errio.String())
+			}
+		}
+
 		// set difference old and new applied objects
-		for _, obj := range objects {
+		managedCluster.Status.Applied = make([]corev1.ObjectReference, len(runObjs))
+		for i := range runObjs {
+			obj := runObjs[i].(Object)
 			log.V(2).Info("removing gvk from diff", "gvk", obj.GetObjectKind().GroupVersionKind().String(), "name", obj.GetName(), "namespace", obj.GetNamespace())
 			apiVersion, kind := obj.GetObjectKind().GroupVersionKind().ToAPIVersionAndKind()
 			ref := corev1.ObjectReference{
@@ -257,25 +287,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 				APIVersion: apiVersion,
 			}
 			delete(diff, ref)
-		}
-
-		managedCluster.Status.Applied = nil
-
-		// Apply current objects
-		for i := range objects {
-			obj := objects[i]
-			apiVersion, kind := obj.GetObjectKind().GroupVersionKind().ToAPIVersionAndKind()
-			ref := corev1.ObjectReference{
-				Name:       obj.GetName(),
-				Namespace:  obj.GetNamespace(),
-				Kind:       kind,
-				APIVersion: apiVersion,
-			}
-			managedCluster.Status.Applied = append(managedCluster.Status.Applied, ref)
-			if _, err := controllerutil.CreateOrUpdate(ctx, kubeclient, obj, func() error { return nil }); err != nil {
-				log.WithName("target").WithValues("gvk", obj.GetObjectKind().GroupVersionKind().String(), "name", obj.GetName(), "namespace", obj.GetNamespace()).Info("applying object")
-				return ctrl.Result{}, errors.Wrap(err, "failed to create object")
-			}
+			managedCluster.Status.Applied = append(managedCluster.Status.Applied)
 		}
 
 		// Delete old objects
@@ -287,8 +299,8 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 			obj.SetNamespace(ref.Namespace)
 			if err := kubeclient.Delete(ctx, obj); client.IgnoreNotFound(err) != nil {
 				if meta.IsNoMatchError(err) {
-					log.Info("gvk not found, crd likely not installed. will continue")
-					log.Info(err.Error())
+					log.V(2).Info("gvk not found, crd likely not installed. will continue")
+					log.V(2).Info(err.Error())
 					continue
 				}
 				log.Error(err, "failed to delete previously applied item in diff")
@@ -308,32 +320,24 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 	return ctrl.Result{RequeueAfter: time.Second * 60}, nil
 }
 
-func decode(d *decoder.YamlDecoder, log logr.Logger) ([]Object, error) {
-	var out []Object
+func decode(r *apiyaml.YAMLReader, log logr.Logger) ([]*unstructured.Unstructured, error) {
+	var out []*unstructured.Unstructured
 	for {
-		obj, raw, err := d.Decode(nil, nil)
+		raw, err := r.Read()
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			if runtime.IsNotRegisteredError(err) {
-				log.V(1).Info("failed to recognize object")
-				log.V(1).Info(err.Error())
-				var yamldata map[string]interface{}
-				if fail := yaml.Unmarshal(raw, &yamldata); fail != nil {
-					log.Error(fail, "failed to unmarshal object as unstructured")
-					return nil, fail
-				}
-				log.V(1).Info("successfully recognized foreign object as unstructured")
-				unstruct := &unstructured.Unstructured{
-					Object: yamldata,
-				}
-				out = append(out, unstruct)
-				continue
-			}
 			return nil, err
 		}
-		union := obj.(Object)
-		out = append(out, union)
+		var yamldata map[string]interface{}
+		if fail := yaml.Unmarshal(raw, &yamldata); fail != nil {
+			log.Error(fail, "failed to unmarshal object as unstructured")
+			return nil, fail
+		}
+		unstruct := &unstructured.Unstructured{
+			Object: yamldata,
+		}
+		out = append(out, unstruct)
 	}
 	return out, nil
 }
