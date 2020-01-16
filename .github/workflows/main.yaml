@@ -10,7 +10,9 @@ on:
             - 'ace/svc-dev'
 env:
     DOCKER_USER: ${{ secrets.DOCKER_USER }}
-    DOCKER_PASS: ${{ secrets.DOCKER_PASS }}       
+    DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+    VAULT: aks-dataplane-test
+    GENEVA_SECRET: geneva-agent    
 
 jobs:
     # kustomize_img:
@@ -95,11 +97,12 @@ jobs:
         - name: bootstrap
           run: |
             export PATH=$PATH:${GITHUB_WORKSPACE}/bin
+            az login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}
             ${GITHUB_WORKSPACE}/bin/bootstrap -f ./cmd/bootstrap/config.yaml --app ${AZURE_CLIENT_ID} --tenant ${AZURE_TENANT_ID} --key ${AZURE_CLIENT_SECRET}
             kustomize build ./config/flux | kubectl --kubeconfig ./kubeconfig apply -f -
             kubectl --kubeconfig ./kubeconfig create secret generic -n flux-mgmt flux-git-deploy-mgmt --dry-run=true --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
             kubectl --kubeconfig ./kubeconfig create secret generic -n flux-clusters flux-git-deploy-clusters --dry-run=true --from-literal=identity="${SSH_KEY}" -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
-            az keyvault secret download --vault-name aks-dataplane-test -n geneva-agent -e base64 -f cert.pfx
+            az keyvault secret download --vault-name ${VAULT} -n ${GENEVA_SECRET} -e base64 -f cert.pfx
             openssl pkcs12 -nocerts -nodes -passin pass: -in cert.pfx -out gcskey.pem && openssl rsa -in gcskey.pem -out gcskey.pem
             openssl pkcs12 -nokeys -nodes -passin pass: -in cert.pfx -out gcscert.pem && openssl x509 -in gcscert.pem -out gcscert.pem
             kubectl --kubeconfig ./kubeconfig create secret generic gcscert --dry-run=true --from-file=gcscert.pem=gcscert.pem --from-file=gcskey.pem=gcskey.pem -o yaml | kubectl --kubeconfig ./kubeconfig apply -f -
