@@ -35,3 +35,15 @@ spec:
           image: "alexeldeib/cosmosbd-prom:latest"
           ports:
             - containerPort: 1234
+          args: ["--url", "$(COSMOSDB_URL)", "--key", "$(COSMOSDB_KEY)"]
+          env:
+          - name: COSMOSDB_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cosmosdb
+                key: key
+          - name: COSMOSDB_URL
+            valueFrom:
+              secretKeyRef:
+                name: cosmosdb
+                key: url
