@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: cosmosdb-prom
-          image: "alexeldeib/cosmosbd-prom:latest"
+          image: "alexeldeib/cosmosdb-prom:latest"
           ports:
             - containerPort: 1234
           args: ["--url", "$(COSMOSDB_URL)", "--key", "$(COSMOSDB_KEY)"]
