@@ -45024,6 +45024,7 @@ spec:
   replicas: 2
   remoteWrite:
   - url: http://prom-to-log.monitoring:9090/receive
+  - url: http://cosmosdb-prom.monitoring:9090/receive
   resources:
     requests:
       memory: 400Mi

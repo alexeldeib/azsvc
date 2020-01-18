@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: tracer
+  name: tracer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tracer
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: tracer
+    spec:
+      containers:
+      - image: alexeldeib/bpf_exporter:latest
+        name: bpf_exporter
+        resources: {}
