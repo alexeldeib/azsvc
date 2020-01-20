@@ -24,7 +24,7 @@ spec:
   kustomizations:
   # - https://github.com/alexeldeib/cd-example
   - github.com/alexeldeib/azsvc/workloads/fluentbit?ref=ace/svc-dev
-  - github.com/alexeldeib/azsvc/workloads/prom2cosmos?ref=ace/svc-dev
+  # - github.com/alexeldeib/azsvc/workloads/prom2cosmos?ref=ace/svc-dev
   - github.com/alexeldeib/azsvc/workloads/prom-to-log?ref=ace/svc-dev
   - github.com/alexeldeib/azsvc/workloads/prometheus?ref=ace/svc-dev
   - github.com/alexeldeib/azsvc/workloads/certmanager?ref=ace/svc-dev
