@@ -18,14 +18,24 @@ data:
         HTTP_Port     2020
     @INCLUDE input-kubernetes.conf
     @INCLUDE filter-kubernetes.conf
-    @INCLUDE output-kafka.conf
+    @INCLUDE output-mdsd.conf
   input-kubernetes.conf: |
     [INPUT]
         Name              tail
         Tag               kube.*
         Path              /var/log/containers/*.log
+        Exclude_Path      /var/log/containers/*prom-to-log-*_prom-to-log-*
         Parser            docker
         DB                /var/log/flb_kube.db
+        Mem_Buf_Limit     5MB
+        Skip_Long_Lines   On
+        Refresh_Interval  10
+    [INPUT]
+        Name              tail
+        Tag               rawmetrics
+        Path              /var/log/containers/*prom-to-log-*_prom-to-log-*.log
+        Parser            docker
+        DB                /var/log/flb_rawmetrics.db
         Mem_Buf_Limit     5MB
         Skip_Long_Lines   On
         Refresh_Interval  10
@@ -58,7 +68,7 @@ data:
         Merge_Log_Key       log_processed
         K8S-Logging.Parser  On
         K8S-Logging.Exclude Off
-  output-kafka.conf: |
+  output-mdsd.conf: |
     [OUTPUT]
       Name forward
       Host 127.0.0.1
@@ -71,7 +81,7 @@ data:
       Port 5010
       Format json_stream
       Match kube.var.log.containers.*
-      Exclude kubelog
+      Exclude kubelog rawmetrics
 
   parsers.conf: |
     [PARSER]

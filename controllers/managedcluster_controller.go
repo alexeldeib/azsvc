@@ -354,7 +354,7 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 	}
 
 	log.V(1).Info("successfully reconciled")
-	return ctrl.Result{RequeueAfter: time.Second * 60}, nil
+	return ctrl.Result{RequeueAfter: time.Second * 180}, nil
 }
 
 func decode(r *apiyaml.YAMLReader, log logr.Logger) ([]*unstructured.Unstructured, error) {

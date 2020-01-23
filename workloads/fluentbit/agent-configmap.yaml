@@ -120,6 +120,7 @@ data:
         <Source name="user" schema="syslog" />
         <Source name="daemon" schema="syslog" />
         <Source name="syslog" dynamic_schema="true"/>
+        <Source name="rawmetrics" dynamic_schema="true"/>
         <Source name="heartbeat" schema="azsecv1" />
         <Source name="baseline" schema="azsecv1" />
         <Source name="software" schema="azsecv1" />
@@ -157,6 +158,9 @@ data:
           <MdsdEventSource source="syslog">
             <RouteEvent eventName="syslog" priority="Normal" storeType="CentralBond" />
           </MdsdEventSource>
+          <MdsdEventSource source="rawmetrics">
+            <RouteEvent eventName="rawmetrics" priority="Normal" storeType="CentralBond" />
+          </MdsdEventSource>
           <MdsdEventSource source="heartbeat">
             <RouteEvent eventName="LinuxAsmHeartbeat" priority="Normal" storeType="CentralBond" />
           </MdsdEventSource>
@@ -188,11 +192,17 @@ data:
           <Cosmos>
             <Content><![CDATA[ <Config /> ]]></Content>
           </Cosmos>
+          <LogAnalytics>
+            <Content>LogAnalyticsContent</Content>
+          </LogAnalytics>
         </EventStreamingAnnotation>
         <EventStreamingAnnotation name="syslog">
           <Cosmos>
             <Content><![CDATA[ <Config /> ]]></Content>
           </Cosmos>
+          <LogAnalytics>
+            <Content>LogAnalyticsContent</Content>
+          </LogAnalytics>
         </EventStreamingAnnotation>
       </EventStreamingAnnotations>
     </MonitoringManagement>
