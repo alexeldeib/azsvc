@@ -27,6 +27,8 @@ spec:
   - github.com/alexeldeib/azsvc/workloads/prom-to-log?ref=ace/svc-dev
   - github.com/alexeldeib/azsvc/workloads/prometheus?ref=ace/svc-dev
   - github.com/alexeldeib/azsvc/workloads/certmanager?ref=ace/svc-dev
+  manifests:
+  - https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/master/release/kubernetes-manifests.yaml 
   objectRefs:
   - kind: Secret
     apiVersion: v1
