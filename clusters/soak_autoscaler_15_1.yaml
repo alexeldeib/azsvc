@@ -1,0 +1,21 @@
+apiVersion: azure.alexeldeib.xyz/v1alpha1
+kind: ManagedCluster
+metadata:
+  name: soak-autoscaler-15-1
+spec:
+  subscriptionId: 8643025a-c059-4a48-85d0-d76f51d63a74
+  resourceGroup: marwanad-soak-autoscaler
+  location: westus2
+  name: ace-test
+  sshPublicKey: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDnafEQ91LfDdcpuPP52nxVkwgdDXhbZHFUsSLdfPYWsbgv+1+nThMBimYWIUmnoQnlFaz9lEbvj7gh+oZf/DEaLHNdFgI0JTAroI4hgHShGL/dg+javFp2b2TqpAmDditsA1xxsSPNsWCqSkcD1vOh6/ucX0QT50yI+lf/CuB+5HadC47b5fB0yFeipLe8HhkAdipuoSEuY5wpt37nsSDIeLVHUPRbSSPt14h1Ot2ni3vQGsyfZgGvDa/GT7tq3FZbQe7n7EIhqA8vdtey1+iztBXJIjqkO0nUwJM/aTvhbgwg1sKWH5xmb61vKQpmTP2imgcn5YMMxLr11hED13v7 ace@ace-x1
+  version: 1.15.7
+  credentialsRef:
+    name: azure-creds
+    namespace: azsvc-system
+  nodePools:
+  - name: main
+    sku: Standard_DS2_v2
+    replicas: 3
+    osDiskSizeGb: 100
+  kustomizations:
+  - github.com/alexeldeib/azsvc/workloads/scaling-cronjob?ref=ace/svc-dev
