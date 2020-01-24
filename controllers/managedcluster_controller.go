@@ -111,10 +111,10 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 	}
 
 	if err := r.ClusterService.Ensure(ctx, log, managedCluster, creds); err != nil {
-		return ctrl.Result{}, err
+		log.Error(err, "failed to update cluster")
+		// return ctrl.Result{}, err
 	}
 
-	var failure error
 	for i := range managedCluster.Spec.AgentPools {
 		pool := &v1alpha1.AgentPool{
 			Spec: azurev1alpha1.AgentPoolSpec{
@@ -126,14 +126,15 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 		}
 		log := log.WithValues("agentpool", pool.Spec.Name)
 		if err := r.PoolService.Ensure(ctx, log, pool); err != nil {
-			failure = err
+			// failures = append(failures, err)
 			log.Error(err, fmt.Sprintf("failed to updated agent pool: %s", pool.Spec.Name))
 		}
 	}
 
-	if failure != nil {
-		return ctrl.Result{}, failure
-	}
+	// // TODO(ace): move this back here when we get throttled less?
+	// if failure != nil {
+	// 	return ctrl.Result{}, failure
+	// }
 
 	// We may want to store the Kubeconfig from the ManagedCluster in a Kubernetes secret.
 	// Alternatively, we may need the Kubeconfig to apply some Kustomization workloads against the cluster.

@@ -70,9 +70,9 @@ func poll(ctx context.Context, log logr.Logger, client autorest.Client, future a
 		log.Info("reconciling with backoff")
 		done, err = future.DoneWithContext(ctx, client)
 		if err != nil {
-			log.Error(err, "failed reconcile attempt")
+			log.Info(fmt.Sprintf("failed reconcile attempt, %s", err.Error()))
 		}
-		return done && err == nil, nil
+		return done, err
 	})
 }
 
