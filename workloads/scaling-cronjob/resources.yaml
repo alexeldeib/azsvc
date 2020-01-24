@@ -1,12 +1,8 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  creationTimestamp: "2019-12-06T18:10:08Z"
   name: hello
   namespace: default
-  resourceVersion: "469983"
-  selfLink: /apis/batch/v1beta1/namespaces/default/cronjobs/hello
-  uid: a92ebd91-a11c-4d18-b474-350f9bc4d87a
 spec:
   concurrencyPolicy: Allow
   failedJobsHistoryLimit: 1
@@ -45,5 +41,3 @@ spec:
   schedule: '*/15 * * * *'
   successfulJobsHistoryLimit: 3
   suspend: false
-status:
-  lastScheduleTime: "2019-12-07T03:30:00Z"
