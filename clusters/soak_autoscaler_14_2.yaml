@@ -17,7 +17,7 @@ spec:
     sku: Standard_DS2_v2
     replicas: 3
     osDiskSizeGb: 100
-  - name: main 
+  - name: next 
     sku: Standard_DS2_v2
     replicas: 1
     osDiskSizeGb: 100
