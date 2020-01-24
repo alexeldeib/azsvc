@@ -21,4 +21,14 @@ spec:
     sku: Standard_E8_v3
     replicas: 3
     osDiskSizeGb: 500
-  kustomizations: []
+  kustomizations:
+  - github.com/alexeldeib/azsvc/workloads/bpf_exporter?ref=ace/svc-dev
+  - github.com/alexeldeib/azsvc/workloads/fluentbit?ref=ace/svc-dev
+  - github.com/alexeldeib/azsvc/workloads/prom-to-log?ref=ace/svc-dev
+  - github.com/alexeldeib/azsvc/workloads/prometheus?ref=ace/svc-dev
+  - github.com/alexeldeib/azsvc/workloads/certmanager?ref=ace/svc-dev
+  objectRefs:
+  - kind: Secret
+    apiVersion: v1
+    name: agent-certificates
+    namespace: monitoring

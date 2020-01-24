@@ -17,18 +17,71 @@ spec:
       labels:
         app: tracer
     spec:
+      hostNetwork: true
+      hostPID: true
       containers:
       - image: alexeldeib/bpf_exporter:latest
         name: bpf-exporter
-        args: [--config, "/etc/bpfexporter/config.yaml"]
+        # command: ["sleep", "infinity"]
+        args: [--config.file, "/etc/bpfexporter/config.yaml"]
+        ports:
+        - containerPort: 9435
+          name: http
         resources: {}
+        securityContext:
+          privileged: true
         volumeMounts:
         - name: config
           mountPath: /etc/bpfexporter
+        - mountPath: /lib/modules
+          name: mod
+        - mountPath: /usr/src
+          name: src
+        - mountPath: /sys
+          name: sys
       volumes:
       - name: config
         configMap:
           name: bpf-exporter-config
+      - hostPath:
+          path: /lib/modules
+          type: ""
+        name: mod
+      - hostPath:
+          path: /usr/src
+          type: ""
+        name: src
+      - hostPath:
+          path: /sys
+          type: ""
+        name: sys
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: tracer
+  name: tracer
+spec:
+  clusterIP: None
+  ports:
+  - name: http
+    port: 9100
+    targetPort: http
+  selector:
+    app: tracer
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: tracer
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: tracer
 ---
 apiVersion: v1
 kind: ConfigMap

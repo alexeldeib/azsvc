@@ -1,3 +1,5 @@
+ARG distro=xenial
+
 FROM golang:1.13.6-stretch as builder
 
 # Doing mostly what CI is doing here
@@ -14,13 +16,24 @@ RUN git clone https://github.com/cloudflare/ebpf_exporter /go/ebpf_exporter
 
 RUN cd /go/ebpf_exporter && GOPATH="" GOPROXY="off" GOFLAGS="-mod=vendor" go install -v ./...
 
-# Use distroless as minimal base image to package the manager binary
-# Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/base-debian10:nonroot
+FROM ubuntu:xenial
 
-WORKDIR /
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4052245BD4284CDD
+RUN echo "deb http://repo.iovisor.org/apt/xenial xenial main" > /etc/apt/sources.list.d/iovisor.list
+RUN apt update
+RUN apt-get install -y bcc-tools libbcc-examples
+
 COPY --from=builder /root/go/bin/ebpf_exporter /ebpf_exporter
 
-USER nonroot
+# Use distroless as minimal base image to package the manager binary
+# Refer to https://github.com/GoogleContainerTools/distroless for more details
+# FROM ubuntu:xenial
+
+# WORKDIR /
+# COPY --from=base /bcc/build/src/cc/libbcc.a /usr/local/lib/libbcc.a
+# COPY --from=base /bcc/build/src/cc/libbcc-loader-static.a /usr/local/lib/libbcc-loader-static.a
+# COPY --from=base /bcc/build/src/cc/libbcc_bpf.a /usr/local/lib/libbpf.a
+
+# USER nonroot
 
 ENTRYPOINT ["/ebpf_exporter"]
