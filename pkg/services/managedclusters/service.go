@@ -81,7 +81,7 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Man
 	}
 
 	diff := spec.Diff()
-	if diff == "" && *spec.internal.ProvisioningState != "Failed" {
+	if diff == "" && spec.internal.ProvisioningState != nil && *spec.internal.ProvisioningState != "Failed" {
 		log.V(2).Info("no update required, found and desired objects equal")
 		return nil
 	}
