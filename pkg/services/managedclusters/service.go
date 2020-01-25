@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/services/containerservice/mgmt/2019-11-01/containerservice"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
 	"github.com/go-logr/logr"
@@ -52,6 +51,7 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Man
 		return err
 	}
 
+	log.V(1).Info("fetching azure cluster")
 	spec, err := s.Get(ctx, obj.Spec.SubscriptionID, obj.Spec.ResourceGroup, obj.Spec.Name)
 	if err != nil {
 		return err
@@ -68,6 +68,7 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Man
 		SSHPublicKey(obj.Spec.SSHPublicKey),
 	)
 
+	log.V(1).Info("checking if cluster exists")
 	if !spec.Exists() {
 		for _, pool := range obj.Spec.AgentPools {
 			spec.Set(
@@ -80,6 +81,7 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Man
 		return fmt.Errorf("resource still in provisioning state: %s", *spec.internal.ProvisioningState)
 	}
 
+	log.V(1).Info("fetching azure cluster")
 	diff := spec.Diff()
 	if diff == "" && spec.internal.ProvisioningState != nil && *spec.internal.ProvisioningState != "Failed" {
 		log.V(2).Info("no update required, found and desired objects equal")
@@ -126,7 +128,7 @@ func (s *Service) Get(ctx context.Context, subscriptionID, resourceGroup, name s
 
 	return &Spec{
 		internal: &result,
-		old:      &containerservice.ManagedCluster{},
+		old:      &result,
 	}, nil
 }
 

@@ -3,11 +3,12 @@ package agentpools
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/services/containerservice/mgmt/2019-11-01/containerservice"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/go-logr/logr"
+	"github.com/sanity-io/litter"
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/alexeldeib/azsvc/api/v1alpha1"
@@ -47,12 +48,14 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Age
 	if err != nil {
 		return err
 	}
+
 	spec, err := s.Get(ctx, obj.Spec.SubscriptionID, obj.Spec.ResourceGroup, obj.Spec.Cluster, obj.Spec.Name)
 	if err != nil {
 		return err
 	}
 
-	spec.Set(
+	litter.Config.FieldExclusions = regexp.MustCompile(`Response`)
+	if err := spec.Set(
 		Name(obj.Spec.Name),
 		SKU(obj.Spec.SKU),
 		Count(obj.Spec.Replicas),
@@ -60,12 +63,16 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Age
 		SubscriptionID(obj.Spec.SubscriptionID),
 		ResourceGroup(obj.Spec.ResourceGroup),
 		KubernetesVersion(obj.Spec.Version),
-	)
+	); err != nil {
+		log.Error(err, "failed to set spec for agent pool")
+		return err
+	}
 
 	// TODO(ace): fix necessity of this
+	log.V(1).Info("diffing agent pool, will not apply update if diff is empty")
 	diff := spec.Diff()
-	if diff == "" {
-		log.V(2).Info("no update required, found and desired objects equal")
+	if diff == "" && spec.internal.ProvisioningState != nil && *spec.internal.ProvisioningState != "Failed" {
+		log.V(1).Info("no update required, found and desired objects equal")
 		return nil
 	}
 	fmt.Printf("update required (+want -have):\n%s", diff)
@@ -82,7 +89,7 @@ func (s *Service) Ensure(ctx context.Context, log logr.Logger, obj *v1alpha1.Age
 		if err != nil {
 			log.Error(err, "failed reconcile attempt")
 		}
-		return done && err == nil, nil
+		return done && err == nil, err
 	})
 }
 
@@ -114,6 +121,6 @@ func (s *Service) Get(ctx context.Context, subscriptionID, resourceGroup, cluste
 
 	return &Spec{
 		internal: &result,
-		old:      &containerservice.AgentPool{},
+		old:      &result,
 	}, nil
 }

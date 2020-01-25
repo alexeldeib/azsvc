@@ -5,7 +5,7 @@
 package v1alpha1
 
 import (
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -212,6 +212,16 @@ func (in *ManagedClusterSpec) DeepCopyInto(out *ManagedClusterSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.Manifests != nil {
+		in, out := &in.Manifests, &out.Manifests
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
+	if in.ObjectRefs != nil {
+		in, out := &in.ObjectRefs, &out.ObjectRefs
+		*out = make([]v1.ObjectReference, len(*in))
+		copy(*out, *in)
+	}
 	if in.AgentPools != nil {
 		in, out := &in.AgentPools, &out.AgentPools
 		*out = make([]AgentPoolTemplate, len(*in))
@@ -267,6 +277,11 @@ func (in *ManagedClusterStatus) DeepCopyInto(out *ManagedClusterStatus) {
 	if in.Future != nil {
 		in, out := &in.Future, &out.Future
 		*out = make([]byte, len(*in))
+		copy(*out, *in)
+	}
+	if in.Applied != nil {
+		in, out := &in.Applied, &out.Applied
+		*out = make([]v1.ObjectReference, len(*in))
 		copy(*out, *in)
 	}
 }

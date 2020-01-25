@@ -110,11 +110,13 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 		return ctrl.Result{}, err
 	}
 
+	log.V(1).Info("reconciling cluster")
 	if err := r.ClusterService.Ensure(ctx, log, managedCluster, creds); err != nil {
 		log.Error(err, "failed to update cluster")
 		// return ctrl.Result{}, err
 	}
 
+	log.V(1).Info("reconciling agent pools")
 	for i := range managedCluster.Spec.AgentPools {
 		pool := &v1alpha1.AgentPool{
 			Spec: azurev1alpha1.AgentPoolSpec{
@@ -124,8 +126,13 @@ func (r *ManagedClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 				AgentPoolTemplate: managedCluster.Spec.AgentPools[i],
 			},
 		}
+		if pool.Spec.AgentPoolTemplate.Version == nil {
+			pool.Spec.AgentPoolTemplate.Version = &managedCluster.Spec.Version
+		}
 		log := log.WithValues("agentpool", pool.Spec.Name)
+		log.V(1).Info("reconciling pool")
 		if err := r.PoolService.Ensure(ctx, log, pool); err != nil {
+			log.Info("failed pool reconcile")
 			// failures = append(failures, err)
 			log.Error(err, fmt.Sprintf("failed to updated agent pool: %s", pool.Spec.Name))
 		}

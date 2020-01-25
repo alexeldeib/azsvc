@@ -4,6 +4,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/containerservice/mgmt/2019-11-01/containerservice"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/mitchellh/copystructure"
 )
 
 var defaultUser string = "azureuser"
@@ -42,11 +43,16 @@ func defaultSpec(name string) *Spec {
 	return result
 }
 
-func (s *Spec) Set(options ...specOption) {
-	*s.old = *s.internal
+func (s *Spec) Set(options ...specOption) error {
+	copied, err := copystructure.Copy(s.internal)
+	if err != nil {
+		return err
+	}
+	s.old, _ = copied.(*containerservice.ManagedCluster)
 	for _, option := range options {
 		s = option(s)
 	}
+	return nil
 }
 
 func (s *Spec) Diff() string {
