@@ -19,7 +19,7 @@ spec:
     osDiskSizeGb: 100
   - name: second 
     sku: Standard_DS2_v2
-    replicas: 1
+    replicas: 2
     osDiskSizeGb: 100
   kustomizations:
   - github.com/alexeldeib/azsvc/workloads/scaling-cronjob?ref=ace/svc-dev
