@@ -52,7 +52,9 @@ func (s *Spec) Exists() bool {
 func (s *Spec) Diff() string {
 	ignored := []cmp.Option{
 		cmpopts.IgnoreFields(containerservice.AgentPool{}, "Response"),
-		cmpopts.IgnoreFields(containerservice.AgentPool{}, "ManagedClusterAgentPoolProfileProperties.Count"),
+	}
+	if s.Exists() {
+		ignored = append(ignored, cmpopts.IgnoreFields(containerservice.AgentPool{}, "ManagedClusterAgentPoolProfileProperties.Count"))
 	}
 	return cmp.Diff(s.old, s.internal, ignored...)
 }
