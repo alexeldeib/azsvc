@@ -32,6 +32,6 @@ spec:
     spec:
       containers:
         - name: prom-to-log
-          image: "shanalily/prom-to-log"
+          image: "alexeldeib/prom-to-log"
           ports:
             - containerPort: 1234
