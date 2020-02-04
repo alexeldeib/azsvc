@@ -1,0 +1,144 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: adservice
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: adservice
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cartservice
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: cartservice
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: checkoutservice
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: checkoutservice
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: currencyservice
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: currencyservice
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: adservice
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: adservice
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: emailservice
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: emailservice
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: frontend
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: frontend
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: paymentservice
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: paymentservice
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: productcatalogservice
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: productcatalogservice
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: recommendationservice
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: recommendationservice
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: redis-cart
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: redis-cart
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: shippingservice
+spec:
+  endpoints:
+  - interval: 15s
+    port: http
+  selector:
+    matchLabels:
+      app: shippingservice
+---
