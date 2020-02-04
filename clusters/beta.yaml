@@ -29,7 +29,7 @@ spec:
   - github.com/alexeldeib/azsvc/workloads/certmanager?ref=ace/svc-dev
   manifests:
   - https://istio.io/operator.yaml
-  - https://gist.githubusercontent.com/alexeldeib/3620862b817376ca4afec3e0cff6f764/raw/644a4bbbc8c55e17869a94276bc9d3211a819d5e/deploy.yaml
+  - https://gist.githubusercontent.com/alexeldeib/3620862b817376ca4afec3e0cff6f764/raw/3c597a715a1e6ae2224cfd713bb6744d4c1eaf43/deploy.yaml
   - https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/master/release/kubernetes-manifests.yaml 
   objectRefs:
   - kind: Secret
